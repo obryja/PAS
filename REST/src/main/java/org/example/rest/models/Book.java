@@ -1,5 +1,6 @@
 package org.example.rest.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,6 +11,7 @@ public class Book {
 
     private String title;
 
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Book(String title) {
         this.title = title;
     }

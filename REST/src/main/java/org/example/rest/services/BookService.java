@@ -26,10 +26,11 @@ public class BookService {
     }
 
     public Book updateBook(String id, Book changedBook) {
-        return bookRepository.findById(id).map(book -> {
-            book.setTitle(changedBook.getTitle());
-            return bookRepository.save(book);
-        }).orElseThrow(() -> new RuntimeException("Book not found"));
+        Book existingBook = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+
+        existingBook.setTitle(changedBook.getTitle());
+
+        return bookRepository.save(existingBook);
     }
 
     public void deleteBook(String id) {

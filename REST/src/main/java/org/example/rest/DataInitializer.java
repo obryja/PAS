@@ -1,7 +1,10 @@
 package org.example.rest;
 
+import org.example.rest.enums.Role;
 import org.example.rest.models.Book;
+import org.example.rest.models.User;
 import org.example.rest.repositories.BookRepository;
+import org.example.rest.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -13,11 +16,13 @@ import java.util.Arrays;
 public class DataInitializer implements CommandLineRunner {
 
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public DataInitializer(BookRepository bookRepository, MongoTemplate mongoTemplate) {
+    public DataInitializer(BookRepository bookRepository, UserRepository userRepository, MongoTemplate mongoTemplate) {
         this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -25,6 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Czyszczenie kolekcji przed inicjalizacją danych
         mongoTemplate.dropCollection(Book.class);
+        mongoTemplate.dropCollection(User.class);
 
         // Wczytaj zestaw danych inicjujących
         Book book1 = new Book("To Kill a Mockingbird");
@@ -33,5 +39,14 @@ public class DataInitializer implements CommandLineRunner {
         bookRepository.saveAll(Arrays.asList(book1, book2));
 
         System.out.println("Zainicjalizowano książki.");
+
+        // Wczytaj zestaw danych inicjujących
+        User user1 = new User("client", "client", Role.CLIENT);
+        User user2 = new User("user", "user", Role.USER_ADMIN);
+        User user3 = new User("book", "book", Role.BOOK_ADMIN);
+
+        userRepository.saveAll(Arrays.asList(user1, user2, user3));
+
+        System.out.println("Zainicjalizowano użytkowników.");
     }
 }
