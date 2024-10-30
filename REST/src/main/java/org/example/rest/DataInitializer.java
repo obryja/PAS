@@ -2,8 +2,10 @@ package org.example.rest;
 
 import org.example.rest.enums.Role;
 import org.example.rest.models.Book;
+import org.example.rest.models.Rent;
 import org.example.rest.models.User;
 import org.example.rest.repositories.BookRepository;
+import org.example.rest.repositories.RentRepository;
 import org.example.rest.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -11,18 +13,21 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Date;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final RentRepository rentRepository;
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public DataInitializer(BookRepository bookRepository, UserRepository userRepository, MongoTemplate mongoTemplate) {
+    public DataInitializer(BookRepository bookRepository, UserRepository userRepository, RentRepository rentRepository, MongoTemplate mongoTemplate) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.rentRepository = rentRepository;
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -31,6 +36,7 @@ public class DataInitializer implements CommandLineRunner {
         // Czyszczenie kolekcji przed inicjalizacją danych
         mongoTemplate.dropCollection(Book.class);
         mongoTemplate.dropCollection(User.class);
+        mongoTemplate.dropCollection(Rent.class);
 
         // Wczytaj zestaw danych inicjujących
         Book book1 = new Book("To Kill a Mockingbird");
@@ -48,5 +54,9 @@ public class DataInitializer implements CommandLineRunner {
         userRepository.saveAll(Arrays.asList(user1, user2, user3));
 
         System.out.println("Zainicjalizowano użytkowników.");
+
+        Rent rent1 = new Rent(user1.getId(), book1.getId(), new Date());
+
+        rentRepository.saveAll(Arrays.asList(rent1));
     }
 }
