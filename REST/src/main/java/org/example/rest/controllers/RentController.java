@@ -11,8 +11,11 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/rents")
 public class RentController {
-    @Autowired
-    private RentService rentService;
+    private final RentService rentService;
+
+    public RentController(RentService rentService) {
+        this.rentService = rentService;
+    }
 
     @GetMapping
     public List<Rent> getAllRents() {

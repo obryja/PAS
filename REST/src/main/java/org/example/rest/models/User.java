@@ -1,6 +1,5 @@
 package org.example.rest.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import org.example.rest.enums.Role;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

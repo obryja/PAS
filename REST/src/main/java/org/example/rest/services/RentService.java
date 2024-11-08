@@ -11,8 +11,11 @@ import java.util.Optional;
 
 @Service
 public class RentService {
-    @Autowired
-    private RentRepository rentRepository;
+    private final RentRepository rentRepository;
+
+    public RentService(RentRepository rentRepository) {
+        this.rentRepository = rentRepository;
+    }
 
     public Rent createRent(Rent rent) {
         return rentRepository.save(rent);
@@ -39,7 +42,7 @@ public class RentService {
     }
 
     public List<Rent> getArchiveRentsByBookId(String bookId) {
-        return rentRepository.findByBookIdAndEndDateIsNull(bookId);
+        return rentRepository.findByBookIdAndEndDateIsNotNull(bookId);
     }
 
     public Rent endRent(String id) {

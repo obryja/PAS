@@ -2,6 +2,7 @@ package org.example.rest.services;
 
 import org.example.rest.models.Book;
 import org.example.rest.repositories.BookRepository;
+import org.example.rest.repositories.RentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +11,14 @@ import java.util.Optional;
 
 @Service
 public class BookService {
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
+
+    private final RentRepository rentRepository;
+
+    public BookService(BookRepository bookRepository, RentRepository rentRepository) {
+        this.bookRepository = bookRepository;
+        this.rentRepository = rentRepository;
+    }
 
     public Book createBook(Book book) {
         return bookRepository.save(book);
@@ -34,6 +41,8 @@ public class BookService {
     }
 
     public void deleteBook(String id) {
+        boolean isRented = !rentRepository.findByBookIdAndEndDateIsNull(id).isEmpty();
+
         bookRepository.deleteById(id);
     }
 }

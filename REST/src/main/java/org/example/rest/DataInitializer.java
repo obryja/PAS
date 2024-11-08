@@ -47,9 +47,9 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Zainicjalizowano książki.");
 
         // Wczytaj zestaw danych inicjujących
-        User user1 = new User("client", "client", Role.CLIENT);
-        User user2 = new User("user", "user", Role.USER_ADMIN);
-        User user3 = new User("book", "book", Role.BOOK_ADMIN);
+        User user1 = new User("client", "client", Role.ROLE_CLIENT);
+        User user2 = new User("user", "user", Role.ROLE_USER_ADMIN);
+        User user3 = new User("book", "book", Role.ROLE_BOOK_ADMIN);
 
         userRepository.saveAll(Arrays.asList(user1, user2, user3));
 
