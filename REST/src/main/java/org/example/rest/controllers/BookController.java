@@ -1,12 +1,13 @@
 package org.example.rest.controllers;
 
+import jakarta.validation.Valid;
 import org.example.rest.models.Book;
 import org.example.rest.services.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -18,27 +19,28 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookService.getAllBooks();
+    public ResponseEntity<List<Book>> getAllBooks() {
+        return ResponseEntity.ok(bookService.getAllBooks());
     }
 
     @GetMapping("/{id}")
-    public Optional<Book> getBookById(@PathVariable String id) {
-        return bookService.getBookById(id);
+    public ResponseEntity<Book> getBookById(@PathVariable String id) {
+        return ResponseEntity.ok(bookService.getBookById(id));
     }
 
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookService.createBook(book);
+    public ResponseEntity<Book> createBook(@RequestBody @Valid Book book) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(book));
     }
 
     @PutMapping("/{id}")
-    public Book updateBook(@PathVariable String id, @RequestBody Book book) {
-        return bookService.updateBook(id, book);
+    public ResponseEntity<Book> updateBook(@PathVariable String id, @RequestBody @Valid Book book) {
+        return ResponseEntity.ok(bookService.updateBook(id, book));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable String id) {
+    public ResponseEntity<Void> deleteBook(@PathVariable String id) {
         bookService.deleteBook(id);
+        return ResponseEntity.ok().build();
     }
 }

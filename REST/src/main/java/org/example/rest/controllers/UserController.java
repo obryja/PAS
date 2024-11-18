@@ -1,10 +1,12 @@
 package org.example.rest.controllers;
 
+import org.example.rest.dto.UserCreateDTO;
 import org.example.rest.dto.UserGetDTO;
 import org.example.rest.dto.UserUpdateDTO;
 import org.example.rest.models.User;
 import org.example.rest.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,42 +21,43 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserGetDTO> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public ResponseEntity<List<UserGetDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}")
-    public UserGetDTO getUserById(@PathVariable String id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserGetDTO> getUserById(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody UserCreateDTO user) {
+        User newUser = User.createUser(user.getUsername(), user.getPassword(), user.isActive(), user.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(newUser));
     }
 
     @GetMapping("/username/{username}")
-    public UserGetDTO getUserByUsername(@PathVariable String username) {
-        return userService.getUserByUsername(username);
+    public ResponseEntity<UserGetDTO> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @GetMapping("/search")
-    public List<UserGetDTO> searchUserByUsername(@RequestParam String username) {
-        return userService.getUsersByUsername(username);
+    public ResponseEntity<List<UserGetDTO>> searchUserByUsername(@RequestParam String username) {
+        return ResponseEntity.ok(userService.getUsersByUsername(username));
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable String id, @RequestBody UserUpdateDTO user) {
-        return userService.updateUser(id, user);
+    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserUpdateDTO user) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(id, user));
     }
 
     @PutMapping("/{id}/activate")
-    public UserGetDTO activateUser(@PathVariable String id) {
-        return userService.activateUser(id);
+    public ResponseEntity<UserGetDTO> activateUser(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.activateUser(id));
     }
 
     @PutMapping("/{id}/deactivate")
-    public UserGetDTO deactivateUser(@PathVariable String id) {
-        return userService.deactivateUser(id);
+    public ResponseEntity<UserGetDTO> deactivateUser(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.deactivateUser(id));
     }
 }

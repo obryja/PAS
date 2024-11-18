@@ -2,11 +2,11 @@ package org.example.rest.controllers;
 
 import org.example.rest.models.Rent;
 import org.example.rest.services.RentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/rents")
@@ -18,47 +18,48 @@ public class RentController {
     }
 
     @GetMapping
-    public List<Rent> getAllRents() {
-        return rentService.getAllRents();
-    }
-
-    @PostMapping
-    public Rent createRent(@RequestBody Rent rent) {
-        return rentService.createRent(rent);
+    public ResponseEntity<List<Rent>> getAllRents() {
+        return ResponseEntity.ok(rentService.getAllRents());
     }
 
     @GetMapping("/{id}")
-    public Optional<Rent> getRentById(@PathVariable String id) {
-        return rentService.getRentById(id);
+    public ResponseEntity<Rent> getRentById(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getRentById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<Rent> createRent(@RequestBody Rent rent) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(rentService.createRent(rent));
     }
 
     @GetMapping("/user/current/{id}")
-    public List<Rent> getCurrentRentsByUser(@PathVariable String id) {
-        return rentService.getCurrentRentsByUserId(id);
+    public ResponseEntity<List<Rent>> getCurrentRentsByUser(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getCurrentRentsByUserId(id));
     }
 
     @GetMapping("/user/archive/{id}")
-    public List<Rent> getArchiveRentsByUser(@PathVariable String id) {
-        return rentService.getArchiveRentsByUserId(id);
+    public ResponseEntity<List<Rent>> getArchiveRentsByUser(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getArchiveRentsByUserId(id));
     }
 
     @GetMapping("/book/current/{id}")
-    public List<Rent> getCurrentRentsByBook(@PathVariable String id) {
-        return rentService.getCurrentRentsByBookId(id);
+    public ResponseEntity<List<Rent>> getCurrentRentsByBook(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getCurrentRentsByBookId(id));
     }
 
     @GetMapping("/book/archive/{id}")
-    public List<Rent> getArchiveRentsByBook(@PathVariable String id) {
-        return rentService.getArchiveRentsByBookId(id);
+    public ResponseEntity<List<Rent>> getArchiveRentsByBook(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getArchiveRentsByBookId(id));
     }
 
     @PutMapping("/{id}")
-    public Rent endRent(@PathVariable String id) {
-        return rentService.endRent(id);
+    public ResponseEntity<Rent> endRent(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.endRent(id));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteRent(@PathVariable String id) {
+    public ResponseEntity<Void> deleteRent(@PathVariable String id) {
         rentService.deleteRent(id);
+        return ResponseEntity.ok().build();
     }
 }

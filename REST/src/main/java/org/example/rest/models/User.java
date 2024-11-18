@@ -1,33 +1,52 @@
 package org.example.rest.models;
 
+import org.bson.BsonType;
+import org.bson.codecs.pojo.annotations.*;
 import org.example.rest.enums.Role;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "users")
-public class User {
-    @Id
+@BsonDiscriminator(key = "_clazz", value = "user")
+public abstract class User {
+    @BsonId
+    @BsonRepresentation(BsonType.OBJECT_ID)
     private String id;
 
-    @Indexed(unique = true)
+    @BsonProperty("username")
     private String username;
 
+    @BsonProperty("password")
     private String password;
 
+    @BsonProperty("active")
     private boolean active;
 
-    private Role role;
-
-    public User(String username, String password, Role role) {
+    @BsonCreator
+    public User(@BsonProperty("username") String username, @BsonProperty("password") String password, @BsonProperty("active") boolean active) {
         this.username = username;
         this.password = password;
-        this.active = true;
-        this.role = role;
+        this.active = active;
+    }
+
+    public User() {}
+
+    public static User createUser(String username, String password, boolean active, Role role) {
+        switch (role) {
+            case ROLE_ADMIN:
+                return new Admin(username, password, active);
+            case ROLE_MANAGER:
+                return new Manager(username, password, active);
+            case ROLE_CLIENT:
+                return new Client(username, password, active);
+            default:
+                throw new IllegalArgumentException("Nieprawidłowa rola: " + role);
+        }
     }
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUsername(){
@@ -36,6 +55,10 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void setPassword(String password) {
@@ -50,11 +73,12 @@ public class User {
         this.active = active;
     }
 
-    public Role getRole(){
-        return role;
-    }
+    public abstract Role getRole();
 
-    public void setRole(Role role){
-        this.role = role;
+    public abstract void setRole(Role role);
+
+    @Override
+    public String toString() {
+        return "User [id=" + id + ", username=" + username + ", password=" + password + ", active=" + active + ", role=" + getRole() + "]";
     }
 }

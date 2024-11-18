@@ -1,28 +1,34 @@
 package org.example.rest.services;
 
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
+import org.example.rest.exceptions.NotFoundException;
 import org.example.rest.models.Rent;
 import org.example.rest.repositories.RentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RentService {
     private final RentRepository rentRepository;
+    private final MongoClient mongoClient;
 
-    public RentService(RentRepository rentRepository) {
+    public RentService(RentRepository rentRepository, @Qualifier("mongoClient") MongoClient mongoClient) {
         this.rentRepository = rentRepository;
+        this.mongoClient = mongoClient;
     }
 
-    public Rent createRent(Rent rent) {
-        return rentRepository.save(rent);
-    }
+    public Rent getRentById(String id) {
+        Rent rent = rentRepository.findById(id);
 
-    public Optional<Rent> getRentById(String id) {
-        return rentRepository.findById(id);
+        if (rent == null) {
+            throw new NotFoundException("Nie znaleziono wypożyczenia o podanym ID");
+        }
+
+        return rent;
     }
 
     public List<Rent> getAllRents() {
@@ -45,15 +51,66 @@ public class RentService {
         return rentRepository.findByBookIdAndEndDateIsNotNull(bookId);
     }
 
-    public Rent endRent(String id) {
-        Rent rent = rentRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        rent.setEndDate(new Date());
+    public Rent createRent(Rent rent) {
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
 
-        return rentRepository.save(rent);
+            Rent createdRent = rentRepository.create(rent);;
+
+            clientSession.commitTransaction();
+            return createdRent;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Wystąpił błąd podczas tworzenia wypożyczenia.");
+        }
+    }
+
+    public Rent endRent(String id) {
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
+
+            Rent existingRent =  rentRepository.findById(id);
+
+            if (existingRent == null) {
+                clientSession.abortTransaction();
+                throw new NotFoundException("Nie znaleziono wypożyczenia o podanym ID");
+            }
+
+            existingRent.setEndDate(LocalDateTime.now());
+
+            Rent updatedRent = rentRepository.update(existingRent);
+
+            if (updatedRent == null) {
+                clientSession.abortTransaction();
+                throw new RuntimeException("Nie udało się zaktualizować wypożyczenia.");
+            }
+
+            clientSession.commitTransaction();
+            return updatedRent;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Wystąpił błąd podczas aktualizacji wypożyczenia.");
+        }
     }
 
     public void deleteRent(String id) {
-        rentRepository.deleteById(id);
-    }
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
 
+            Rent existingRent =  rentRepository.findById(id);
+            if (existingRent == null) {
+                clientSession.abortTransaction();
+                throw new NotFoundException("Nie znaleziono wypożyczenia o podanym ID");
+            }
+
+            boolean deleteSuccess = rentRepository.delete(id);
+
+            if (!deleteSuccess) {
+                clientSession.abortTransaction();
+                throw new RuntimeException("Nie udało się usunąć książki.");
+            }
+
+            clientSession.commitTransaction();
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Wystąpił błąd podczas aktualizacji książki.");
+        }
+    }
 }

@@ -1,23 +1,29 @@
 package org.example.rest.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.bson.BsonType;
+import org.bson.codecs.pojo.annotations.*;
 
-@Document(collection = "books")
 public class Book {
-    @Id
+    @BsonId
+    @BsonRepresentation(BsonType.OBJECT_ID)
     private String id;
 
+    @BsonProperty("title")
     private String title;
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public Book(String title) {
+    @BsonCreator
+    public Book(@BsonProperty("title") String title) {
         this.title = title;
     }
 
+    public Book() {}
+
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -26,5 +32,10 @@ public class Book {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public String toString() {
+        return "Book [id=" + id + ", title=" + title + "]";
     }
 }
