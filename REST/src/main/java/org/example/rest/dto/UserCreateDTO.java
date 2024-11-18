@@ -1,11 +1,22 @@
 package org.example.rest.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.example.rest.enums.Role;
 
 public class UserCreateDTO {
+    @NotNull
+    @Size(min = 3, message = "Nazwa użytkownika musi mieć przynajmniej 3 znaki")
     private String username;
+
+    @NotNull
+    @Size(min = 3, message = "Hasło musi mieć przynajmniej 3 znaki")
     private String password;
+
+    @NotNull
     private boolean active;
+
+    @NotNull
     private Role role;
 
     public UserCreateDTO(String id, String username, String password, boolean active, Role role) {

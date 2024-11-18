@@ -47,10 +47,8 @@ public class MgdUserRepository implements UserRepository {
     public User update(User user) {
         Bson filter = Filters.eq("_id", new ObjectId(user.getId()));
         ReplaceOptions options = new ReplaceOptions().upsert(false);
-        if(userCollection.replaceOne(filter, user, options).getModifiedCount() > 0) {
-            return userCollection.find(filter).first();
-        }
-        return null;
+        userCollection.replaceOne(filter, user, options);
+        return userCollection.find(filter).first();
     }
 
     @Override

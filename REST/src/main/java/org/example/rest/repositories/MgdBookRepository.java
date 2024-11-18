@@ -45,14 +45,12 @@ public class MgdBookRepository implements BookRepository {
     public Book update(Book book) {
         Bson filter = Filters.eq("_id", new ObjectId(book.getId()));
         ReplaceOptions options = new ReplaceOptions().upsert(false);
-        if(bookCollection.replaceOne(filter, book, options).getModifiedCount() > 0) {
-            return bookCollection.find(filter).first();
-        }
-        return null;
+        bookCollection.replaceOne(filter, book, options);
+        return bookCollection.find(filter).first();
     }
 
     @Override
-    public boolean delete(String id) {
-        return bookCollection.deleteOne(Filters.eq("_id", new ObjectId(id))).getDeletedCount() > 0;
+    public void delete(String id) {
+        bookCollection.deleteOne(Filters.eq("_id", new ObjectId(id)));
     }
 }

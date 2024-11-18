@@ -45,15 +45,13 @@ public class MgdRentRepository implements RentRepository {
     public Rent update(Rent rent) {
         Bson filter = Filters.eq("_id", new ObjectId(rent.getId()));
         ReplaceOptions options = new ReplaceOptions().upsert(false);
-        if(rentCollection.replaceOne(filter, rent, options).getModifiedCount() > 0) {
-            return rentCollection.find(filter).first();
-        }
-        return null;
+        rentCollection.replaceOne(filter, rent, options);
+        return rentCollection.find(filter).first();
     }
 
     @Override
-    public boolean delete(String id) {
-        return rentCollection.deleteOne(Filters.eq("_id", new ObjectId(id))).getDeletedCount() > 0;
+    public void delete(String id) {
+        rentCollection.deleteOne(Filters.eq("_id", new ObjectId(id)));
     }
 
     @Override

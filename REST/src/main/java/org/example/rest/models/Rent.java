@@ -1,10 +1,12 @@
 package org.example.rest.models;
 
+import jakarta.validation.constraints.NotNull;
 import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.codecs.pojo.annotations.BsonRepresentation;
+import org.example.rest.validators.ValidObjectId;
 
 import java.time.LocalDateTime;
 
@@ -15,13 +17,18 @@ public class Rent {
 
     @BsonProperty("userId")
     @BsonRepresentation(BsonType.OBJECT_ID)
+    @NotNull
+    @ValidObjectId
     private String userId;
 
     @BsonProperty("bookId")
     @BsonRepresentation(BsonType.OBJECT_ID)
+    @NotNull
+    @ValidObjectId
     private String bookId;
 
     @BsonProperty("beginDate")
+    @NotNull
     private LocalDateTime beginDate;
 
     @BsonProperty("endDate")

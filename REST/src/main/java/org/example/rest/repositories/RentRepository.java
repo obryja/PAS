@@ -9,7 +9,7 @@ public interface RentRepository {
     List<Rent> findAll();
     Rent create(Rent rent);
     Rent update(Rent rent);
-    boolean delete(String id);
+    void delete(String id);
     List<Rent> findByUserIdAndEndDateIsNotNull(String userId);
     List<Rent> findByUserIdAndEndDateIsNull(String userId);
     List<Rent> findByBookIdAndEndDateIsNotNull(String userId);

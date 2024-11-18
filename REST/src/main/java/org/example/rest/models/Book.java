@@ -1,5 +1,6 @@
 package org.example.rest.models;
 
+import jakarta.validation.constraints.NotBlank;
 import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.*;
 
@@ -9,6 +10,7 @@ public class Book {
     private String id;
 
     @BsonProperty("title")
+    @NotBlank(message = "Tytuł nie może być pusty")
     private String title;
 
     @BsonCreator

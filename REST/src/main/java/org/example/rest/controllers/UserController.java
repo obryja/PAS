@@ -1,5 +1,6 @@
 package org.example.rest.controllers;
 
+import jakarta.validation.Valid;
 import org.example.rest.dto.UserCreateDTO;
 import org.example.rest.dto.UserGetDTO;
 import org.example.rest.dto.UserUpdateDTO;
@@ -7,12 +8,14 @@ import org.example.rest.models.User;
 import org.example.rest.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -31,9 +34,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserCreateDTO user) {
-        User newUser = User.createUser(user.getUsername(), user.getPassword(), user.isActive(), user.getRole());
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(newUser));
+    public ResponseEntity<User> createUser(@RequestBody @Valid UserCreateDTO user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
     }
 
     @GetMapping("/username/{username}")
@@ -47,7 +49,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserUpdateDTO user) {
+    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody @Valid UserUpdateDTO user) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(id, user));
     }
 

@@ -2,9 +2,14 @@ package org.example.rest.services;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
+import org.bson.types.ObjectId;
+import org.example.rest.exceptions.BadRequestException;
+import org.example.rest.exceptions.ConflictException;
 import org.example.rest.exceptions.NotFoundException;
 import org.example.rest.models.Book;
+import org.example.rest.models.Rent;
 import org.example.rest.repositories.BookRepository;
+import org.example.rest.repositories.RentRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +18,12 @@ import java.util.List;
 @Service
 public class BookService {
     private final BookRepository bookRepository;
+    private final RentRepository rentRepository;
     private final MongoClient mongoClient;
 
-    public BookService(BookRepository bookRepository, @Qualifier("mongoClient") MongoClient mongoClient) {
+    public BookService(BookRepository bookRepository, RentRepository rentRepository, @Qualifier("mongoClient") MongoClient mongoClient) {
         this.bookRepository = bookRepository;
+        this.rentRepository = rentRepository;
         this.mongoClient = mongoClient;
     }
 
@@ -25,6 +32,12 @@ public class BookService {
     }
 
     public Book getBookById(String id) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         Book book = bookRepository.findById(id);
 
         if (book == null) {
@@ -48,6 +61,12 @@ public class BookService {
     }
 
     public Book updateBook(String id, Book changedBook) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         try (ClientSession clientSession = mongoClient.startSession()) {
             clientSession.startTransaction();
 
@@ -61,38 +80,46 @@ public class BookService {
 
             Book updatedBook = bookRepository.update(existingBook);
 
-            if (updatedBook == null) {
-                clientSession.abortTransaction();
-                throw new RuntimeException("Nie udało się zaktualizować książki.");
-            }
-
             clientSession.commitTransaction();
             return updatedBook;
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new RuntimeException("Wystąpił błąd podczas aktualizacji książki.");
         }
     }
 
     public void deleteBook(String id) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         try (ClientSession clientSession = mongoClient.startSession()) {
             clientSession.startTransaction();
-            // TODO - usunięcie tylko jeżeli nie jest z nim związana żadna alokacja
+
             Book existingBook =  bookRepository.findById(id);
             if (existingBook == null) {
                 clientSession.abortTransaction();
                 throw new NotFoundException("Nie znaleziono książki o podanym ID");
             }
 
-            boolean deleteSuccess = bookRepository.delete(id);
+            List<Rent> currentRents = rentRepository.findByBookIdAndEndDateIsNull(existingBook.getId());
+            List<Rent> archiveRents = rentRepository.findByBookIdAndEndDateIsNotNull(existingBook.getId());
 
-            if (!deleteSuccess) {
+            if (!currentRents.isEmpty() || !archiveRents.isEmpty()) {
                 clientSession.abortTransaction();
-                throw new RuntimeException("Nie udało się usunąć książki.");
+                throw new ConflictException("Nie można usunąć książki, ponieważ ma powiązane wypożyczenia.");
             }
 
+            bookRepository.delete(id);
+
             clientSession.commitTransaction();
+        } catch (NotFoundException | ConflictException e) {
+            throw e;
         } catch (RuntimeException e) {
-            throw new RuntimeException("Wystąpił błąd podczas aktualizacji książki.");
+            throw new RuntimeException("Wystąpił błąd podczas usuwania książki.");
         }
     }
 }

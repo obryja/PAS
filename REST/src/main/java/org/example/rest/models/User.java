@@ -1,5 +1,7 @@
 package org.example.rest.models;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.*;
 import org.example.rest.enums.Role;
@@ -11,19 +13,29 @@ public abstract class User {
     private String id;
 
     @BsonProperty("username")
+    @NotNull
+    @Size(min = 3, message = "Nazwa użytkownika musi mieć przynajmniej 3 znaki")
     private String username;
 
     @BsonProperty("password")
+    @NotNull
+    @Size(min = 3, message = "Hasło musi mieć przynajmniej 3 znaki")
     private String password;
 
     @BsonProperty("active")
+    @NotNull
     private boolean active;
 
+    @BsonProperty("role")
+    @NotNull
+    private Role role;
+
     @BsonCreator
-    public User(@BsonProperty("username") String username, @BsonProperty("password") String password, @BsonProperty("active") boolean active) {
+    public User(@BsonProperty("username") String username, @BsonProperty("password") String password, @BsonProperty("active") boolean active, @BsonProperty Role role) {
         this.username = username;
         this.password = password;
         this.active = active;
+        this.role = role;
     }
 
     public User() {}
@@ -73,9 +85,13 @@ public abstract class User {
         this.active = active;
     }
 
-    public abstract Role getRole();
+    public Role getRole() {
+        return role;
+    }
 
-    public abstract void setRole(Role role);
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     @Override
     public String toString() {

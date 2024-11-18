@@ -9,5 +9,5 @@ public interface BookRepository {
     List<Book> findAll();
     Book create(Book book);
     Book update(Book book);
-    boolean delete(String id);
+    void delete(String id);
 }

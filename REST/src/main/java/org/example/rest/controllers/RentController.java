@@ -1,5 +1,6 @@
 package org.example.rest.controllers;
 
+import jakarta.validation.Valid;
 import org.example.rest.models.Rent;
 import org.example.rest.services.RentService;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class RentController {
     }
 
     @PostMapping
-    public ResponseEntity<Rent> createRent(@RequestBody Rent rent) {
+    public ResponseEntity<Rent> createRent(@RequestBody @Valid Rent rent) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rentService.createRent(rent));
     }
 

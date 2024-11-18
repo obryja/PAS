@@ -1,9 +1,14 @@
 package org.example.rest.services;
 
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
+import org.bson.types.ObjectId;
+import org.example.rest.dto.UserCreateDTO;
 import org.example.rest.dto.UserGetDTO;
 import org.example.rest.dto.UserUpdateDTO;
+import org.example.rest.exceptions.BadRequestException;
+import org.example.rest.exceptions.ConflictException;
 import org.example.rest.exceptions.NotFoundException;
 import org.example.rest.models.Book;
 import org.example.rest.models.User;
@@ -25,6 +30,12 @@ public class UserService {
     }
 
     public UserGetDTO getUserById(String id) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         User user = userRepository.findById(id);
 
         if (user == null) {
@@ -41,6 +52,10 @@ public class UserService {
     }
 
     public UserGetDTO getUserByUsername(String username) {
+        if (username.length() < 3) {
+            throw new BadRequestException("Nazwa użytkownika musi mieć przynajmniej 3 znaki");
+        }
+
         User user = userRepository.findByUsername(username);
         return new UserGetDTO(user.getId(), user.getUsername(), user.isActive(), user.getRole());
     }
@@ -51,20 +66,34 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public User createUser(User user) {
+    public User createUser(UserCreateDTO user) {
         try (ClientSession clientSession = mongoClient.startSession()) {
+            User newUser = User.createUser(user.getUsername(), user.getPassword(), user.isActive(), user.getRole());
+
             clientSession.startTransaction();
 
-            User createdUser = userRepository.create(user);
+            User createdUser = userRepository.create(newUser);
 
             clientSession.commitTransaction();
             return createdUser;
+        } catch (MongoWriteException e) {
+            if (e.getError().getCode() == 11000) {
+                throw new ConflictException("Ta nazwa użytkownika jest już zajęta.");
+            } else {
+                throw new RuntimeException("Wystąpił błąd podczas tworzenia użytkownika.", e);
+            }
         } catch (RuntimeException e) {
             throw new RuntimeException("Wystąpił błąd podczas tworzenia użytkownika.");
         }
     }
 
     public User updateUser(String id, UserUpdateDTO changedUser) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         try (ClientSession clientSession = mongoClient.startSession()) {
             clientSession.startTransaction();
 
@@ -79,19 +108,28 @@ public class UserService {
 
             User updatedUser = userRepository.update(existingUser);
 
-            if (updatedUser == null) {
-                clientSession.abortTransaction();
-                throw new RuntimeException("Nie udało się zaktualizować użytkownika.");
-            }
-
             clientSession.commitTransaction();
             return updatedUser;
+        } catch (MongoWriteException e) {
+            if (e.getError().getCode() == 11000) {
+                throw new ConflictException("Ta nazwa użytkownika jest już zajęta.");
+            } else {
+                throw new RuntimeException("Wystąpił błąd podczas tworzenia użytkownika.", e);
+            }
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new RuntimeException("Wystąpił błąd podczas aktualizacji użytkownika.");
         }
     }
 
     public UserGetDTO activateUser(String id) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         try (ClientSession clientSession = mongoClient.startSession()) {
             clientSession.startTransaction();
 
@@ -105,19 +143,22 @@ public class UserService {
 
             User updatedUser = userRepository.update(existingUser);
 
-            if (updatedUser == null) {
-                clientSession.abortTransaction();
-                throw new RuntimeException("Nie udało się zaktualizować użytkownika.");
-            }
-
             clientSession.commitTransaction();
             return new UserGetDTO(updatedUser.getId(), updatedUser.getUsername(), updatedUser.isActive(), updatedUser.getRole());
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new RuntimeException("Wystąpił błąd podczas aktualizacji użytkownika.");
         }
     }
 
     public UserGetDTO deactivateUser(String id) {
+        boolean idIsValid = ObjectId.isValid(id);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
         try (ClientSession clientSession = mongoClient.startSession()) {
             clientSession.startTransaction();
 
@@ -131,13 +172,10 @@ public class UserService {
 
             User updatedUser = userRepository.update(existingUser);
 
-            if (updatedUser == null) {
-                clientSession.abortTransaction();
-                throw new RuntimeException("Nie udało się zaktualizować użytkownika.");
-            }
-
             clientSession.commitTransaction();
             return new UserGetDTO(updatedUser.getId(), updatedUser.getUsername(), updatedUser.isActive(), updatedUser.getRole());
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new RuntimeException("Wystąpił błąd podczas aktualizacji użytkownika.");
         }
