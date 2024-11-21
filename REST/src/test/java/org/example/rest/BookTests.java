@@ -127,4 +127,46 @@ public class BookTests extends BaseTest {
             .body("[0].title", equalTo("Book 1"))
             .body("[0].id", equalTo(id));
     }
+
+    /* &&&&&&&&&&&&&&&
+         negatywny
+     &&&&&&&&&&&&&&&*/
+
+    @Test
+    public void testBadRequestCreate() {
+        String bookJson = "{ \"title\": \"\" }";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(bookJson)
+        .when()
+            .post("/api/books")
+        .then()
+            .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    public void testBadRequestUpdate() {
+        String bookJson = "{ \"title\": \"Book 4\" }";
+
+        String id =
+        given()
+            .contentType(ContentType.JSON)
+            .body(bookJson)
+        .when()
+            .post("/api/books")
+        .then()
+        .extract()
+            .path("id");
+
+        String updatedBookJson = "{ \"title\": \"\" }";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(updatedBookJson)
+        .when()
+            .put("/api/books/" + id)
+        .then()
+            .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
 }

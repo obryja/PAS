@@ -67,4 +67,52 @@ public class RentTests extends BaseTest {
             .body("beginDate", equalTo("2024-11-21T14:31:16.165"))
             .body("endDate", equalTo(null));
     }
+
+    /* &&&&&&&&&&&&&&&
+         negatywny
+     &&&&&&&&&&&&&&&*/
+
+    @Test
+    public void testConflictRent() {
+        String bookJson = "{ \"title\": \"Book 1\" }";
+
+        String bookId =
+        given()
+            .contentType(ContentType.JSON)
+            .body(bookJson)
+        .when()
+            .post("/api/books")
+        .then()
+        .extract()
+            .path("id");
+
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+
+        String userId =
+        given()
+            .contentType(ContentType.JSON)
+            .body(userJson)
+        .when()
+            .post("/api/users")
+        .then()
+        .extract()
+            .path("id");
+
+
+        String rentJson = "{ \"userId\": \"" + userId + "\", \"bookId\": \"" + bookId + "\", \"beginDate\": \"2024-11-21T14:31:16.165\" }";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(rentJson)
+        .when()
+            .post("/api/rents");
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(rentJson)
+        .when()
+            .post("/api/rents")
+        .then()
+            .statusCode(HttpStatus.CONFLICT.value());
+    }
 }

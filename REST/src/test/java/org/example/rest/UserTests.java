@@ -199,4 +199,65 @@ public class UserTests extends BaseTest {
             .body("[0].active", equalTo(true))
             .body("[0].role", equalTo("ROLE_CLIENT"));
     }
+
+    /* &&&&&&&&&&&&&&&
+         negatywny
+     &&&&&&&&&&&&&&&*/
+
+    @Test
+    public void testBadRequestCreate() {
+        String userJson = "{ \"username\": \"d\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(userJson)
+        .when()
+            .post("/api/users")
+        .then()
+            .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    public void testBadRequestUpdate() {
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+
+        String id =
+        given()
+            .contentType(ContentType.JSON)
+            .body(userJson)
+        .when()
+            .post("/api/users")
+        .then()
+        .extract()
+            .path("id");
+
+        String updatedUserJson = "{ \"username\": \"d\", \"password\": \"test\" }";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(updatedUserJson)
+        .when()
+            .put("/api/users/" + id)
+        .then()
+            .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    public void testConflictUsername() {
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(userJson)
+        .when()
+            .post("/api/users");
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(userJson)
+        .when()
+            .post("/api/users")
+        .then()
+            .statusCode(HttpStatus.CONFLICT.value());
+    }
 }
