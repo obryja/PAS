@@ -53,7 +53,7 @@ public class RentController {
         return ResponseEntity.ok(rentService.getArchiveRentsByBookId(id));
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public ResponseEntity<Rent> endRent(@PathVariable String id) {
         return ResponseEntity.ok(rentService.endRent(id));
     }

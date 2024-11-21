@@ -150,9 +150,15 @@ public class RentService {
                 throw new NotFoundException("Nie znaleziono wypożyczenia o podanym ID");
             }
 
+            if (existingRent.getEndDate() != null) {
+                clientSession.abortTransaction();
+                throw new ConflictException("Wypożyczenie jest już zakończone");
+            }
+
             LocalDateTime now = LocalDateTime.now();
 
             if (now.isBefore(existingRent.getBeginDate())) {
+                clientSession.abortTransaction();
                 throw new ConflictException("Data zakończenia nie może być wcześniejsza niż data rozpoczęcia wypożyczenia");
             }
 

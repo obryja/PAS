@@ -43,7 +43,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/username")
     public ResponseEntity<List<UserGetDTO>> searchUserByUsername(@RequestParam String username) {
         return ResponseEntity.ok(userService.getUsersByUsername(username));
     }
@@ -53,12 +53,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(id, user));
     }
 
-    @PutMapping("/{id}/activate")
+    @PostMapping("/{id}/activate")
     public ResponseEntity<UserGetDTO> activateUser(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.activateUser(id));
     }
 
-    @PutMapping("/{id}/deactivate")
+    @PostMapping("/{id}/deactivate")
     public ResponseEntity<UserGetDTO> deactivateUser(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.deactivateUser(id));
     }
