@@ -4,32 +4,29 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import org.bson.types.ObjectId;
-import org.example.rest.dto.UserCreateDTO;
-import org.example.rest.dto.UserGetDTO;
-import org.example.rest.dto.UserUpdateDTO;
 import org.example.rest.exceptions.BadRequestException;
 import org.example.rest.exceptions.ConflictException;
 import org.example.rest.exceptions.NotFoundException;
-import org.example.rest.models.Book;
 import org.example.rest.models.User;
 import org.example.rest.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final MongoClient mongoClient;
 
+
     public UserService(UserRepository userRepository, @Qualifier("mongoClient") MongoClient mongoClient) {
         this.userRepository = userRepository;
         this.mongoClient = mongoClient;
     }
 
-    public UserGetDTO getUserById(String id) {
+    public User getUserById(String id) {
         boolean idIsValid = ObjectId.isValid(id);
 
         if (!idIsValid) {
@@ -42,37 +39,30 @@ public class UserService {
             throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
         }
 
-        return new UserGetDTO(user.getId(), user.getUsername(), user.isActive(), user.getRole());
+        return user;
     }
 
-    public List<UserGetDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(user -> new UserGetDTO(user.getId(), user.getUsername(), user.isActive(), user.getRole()))
-                .collect(Collectors.toList());
+    public List<User> getAllUsers() {
+        return new ArrayList<>(userRepository.findAll());
     }
 
-    public UserGetDTO getUserByUsername(String username) {
+    public User getUserByUsername(String username) {
         if (username.length() < 3) {
             throw new BadRequestException("Nazwa użytkownika musi mieć przynajmniej 3 znaki");
         }
 
-        User user = userRepository.findByUsername(username);
-        return new UserGetDTO(user.getId(), user.getUsername(), user.isActive(), user.getRole());
+        return userRepository.findByUsername(username);
     }
 
-    public List<UserGetDTO> getUsersByUsername(String username) {
-        return userRepository.findByUsernameContaining(username).stream()
-                .map(user -> new UserGetDTO(user.getId(), user.getUsername(), user.isActive(), user.getRole()))
-                .collect(Collectors.toList());
+    public List<User> getUsersByUsername(String username) {
+        return new ArrayList<>(userRepository.findByUsernameContaining(username));
     }
 
-    public User createUser(UserCreateDTO user) {
+    public User createUser(User user) {
         try (ClientSession clientSession = mongoClient.startSession()) {
-            User newUser = User.createUser(user.getUsername(), user.getPassword(), user.isActive(), user.getRole());
-
             clientSession.startTransaction();
 
-            User createdUser = userRepository.create(newUser);
+            User createdUser = userRepository.create(user);
 
             clientSession.commitTransaction();
             return createdUser;
@@ -87,7 +77,7 @@ public class UserService {
         }
     }
 
-    public User updateUser(String id, UserUpdateDTO changedUser) {
+    public User updateUser(String id, String username, String password) {
         boolean idIsValid = ObjectId.isValid(id);
 
         if (!idIsValid) {
@@ -103,8 +93,8 @@ public class UserService {
                 throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
             }
 
-            existingUser.setUsername(changedUser.getUsername());
-            existingUser.setPassword(changedUser.getPassword());
+            existingUser.setUsername(username);
+            existingUser.setPassword(password);
 
             User updatedUser = userRepository.update(existingUser);
 
@@ -123,7 +113,7 @@ public class UserService {
         }
     }
 
-    public UserGetDTO activateUser(String id) {
+    public User activateUser(String id) {
         boolean idIsValid = ObjectId.isValid(id);
 
         if (!idIsValid) {
@@ -144,7 +134,7 @@ public class UserService {
             User updatedUser = userRepository.update(existingUser);
 
             clientSession.commitTransaction();
-            return new UserGetDTO(updatedUser.getId(), updatedUser.getUsername(), updatedUser.isActive(), updatedUser.getRole());
+            return updatedUser;
         } catch (NotFoundException e) {
             throw e;
         } catch (RuntimeException e) {
@@ -152,7 +142,7 @@ public class UserService {
         }
     }
 
-    public UserGetDTO deactivateUser(String id) {
+    public User deactivateUser(String id) {
         boolean idIsValid = ObjectId.isValid(id);
 
         if (!idIsValid) {
@@ -173,7 +163,7 @@ public class UserService {
             User updatedUser = userRepository.update(existingUser);
 
             clientSession.commitTransaction();
-            return new UserGetDTO(updatedUser.getId(), updatedUser.getUsername(), updatedUser.isActive(), updatedUser.getRole());
+            return updatedUser;
         } catch (NotFoundException e) {
             throw e;
         } catch (RuntimeException e) {

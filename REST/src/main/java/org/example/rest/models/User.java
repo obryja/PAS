@@ -14,12 +14,12 @@ public abstract class User {
 
     @BsonProperty("username")
     @NotNull
-    @Size(min = 3, message = "Nazwa użytkownika musi mieć przynajmniej 3 znaki")
+    @Size(min = 3, max = 50, message = "Nazwa użytkownika musi mieć od 3 do 50 znaków")
     private String username;
 
     @BsonProperty("password")
     @NotNull
-    @Size(min = 3, message = "Hasło musi mieć przynajmniej 3 znaki")
+    @Size(min = 3, max = 50, message = "Hasło musi mieć od 3 do 50 znaków")
     private String password;
 
     @BsonProperty("active")
@@ -39,19 +39,6 @@ public abstract class User {
     }
 
     public User() {}
-
-    public static User createUser(String username, String password, boolean active, Role role) {
-        switch (role) {
-            case ROLE_ADMIN:
-                return new Admin(username, password, active);
-            case ROLE_MANAGER:
-                return new Manager(username, password, active);
-            case ROLE_CLIENT:
-                return new Client(username, password, active);
-            default:
-                throw new IllegalArgumentException("Nieprawidłowa rola: " + role);
-        }
-    }
 
     public String getId() {
         return id;
