@@ -14,14 +14,14 @@ public class UserTests extends BaseTest {
      &&&&&&&&&&&&&&&*/
     @Test
     public void testCreateUser() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String id =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
             .statusCode(HttpStatus.CREATED.value())
             .body("username", equalTo("testclient"))
@@ -45,14 +45,14 @@ public class UserTests extends BaseTest {
 
     @Test
     public void testUpdateUser() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\"}";
 
         String id =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
         .extract()
             .path("id");
@@ -86,14 +86,14 @@ public class UserTests extends BaseTest {
 
     @Test
     public void testActivateAndDeactivateUser() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String id =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
         .extract()
             .path("id");
@@ -137,14 +137,14 @@ public class UserTests extends BaseTest {
 
     @Test
     public void testGetAllUsers() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String id =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
             .extract()
             .path("id");
@@ -164,14 +164,14 @@ public class UserTests extends BaseTest {
 
     @Test
     public void testGetUserSByUsername() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String id =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
         .extract()
             .path("id");
@@ -206,27 +206,27 @@ public class UserTests extends BaseTest {
 
     @Test
     public void testBadRequestCreate() {
-        String userJson = "{ \"username\": \"d\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"d\", \"password\": \"test\" }";
 
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
             .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void testBadRequestUpdate() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String id =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
         .extract()
             .path("id");
@@ -244,19 +244,19 @@ public class UserTests extends BaseTest {
 
     @Test
     public void testConflictUsername() {
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users");
+            .post("/api/users/client");
 
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
             .statusCode(HttpStatus.CONFLICT.value());
     }

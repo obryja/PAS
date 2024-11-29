@@ -26,14 +26,14 @@ public class RentTests extends BaseTest {
         .extract()
             .path("id");
 
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String userId =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
         .extract()
             .path("id");
@@ -86,14 +86,14 @@ public class RentTests extends BaseTest {
         .extract()
             .path("id");
 
-        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\", \"active\": \"true\", \"role\": \"ROLE_CLIENT\" }";
+        String userJson = "{ \"username\": \"testclient\", \"password\": \"test\" }";
 
         String userId =
         given()
             .contentType(ContentType.JSON)
             .body(userJson)
         .when()
-            .post("/api/users")
+            .post("/api/users/client")
         .then()
         .extract()
             .path("id");
