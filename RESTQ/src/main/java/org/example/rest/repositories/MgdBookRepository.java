@@ -1,0 +1,56 @@
+package org.example.rest.repositories;
+
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.InsertOneResult;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
+import org.example.rest.models.Book;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@ApplicationScoped
+public class MgdBookRepository implements BookRepository {
+    private final MongoCollection<Book> bookCollection;
+
+    @Inject
+    public MgdBookRepository(MongoDatabase mongoDatabase) {
+        this.bookCollection = mongoDatabase.getCollection("books", Book.class);
+    }
+
+    @Override
+    public Book findById(String id) {
+        return bookCollection.find(Filters.eq("_id", new ObjectId(id))).first();
+    }
+
+    @Override
+    public List<Book> findAll() {
+        List<Book> books = new ArrayList<>();
+        bookCollection.find().into(books);
+        return books;
+    }
+
+    @Override
+    public Book create(Book book) {
+        InsertOneResult newBook = bookCollection.insertOne(book);
+        return bookCollection.find(Filters.eq("_id", newBook.getInsertedId())).first();
+    }
+
+    @Override
+    public Book update(Book book) {
+        Bson filter = Filters.eq("_id", new ObjectId(book.getId()));
+        ReplaceOptions options = new ReplaceOptions().upsert(false);
+        bookCollection.replaceOne(filter, book, options);
+        return bookCollection.find(filter).first();
+    }
+
+    @Override
+    public void delete(String id) {
+        bookCollection.deleteOne(Filters.eq("_id", new ObjectId(id)));
+    }
+}
