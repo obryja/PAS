@@ -1,6 +1,7 @@
 package org.example.rest.controllers;
 
 import jakarta.validation.Valid;
+import org.example.rest.dto.RentDetailsDTO;
 import org.example.rest.models.Rent;
 import org.example.rest.services.RentService;
 import org.springframework.http.HttpStatus;
@@ -62,5 +63,10 @@ public class RentController {
     public ResponseEntity<Void> deleteRent(@PathVariable String id) {
         rentService.deleteRent(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<List<RentDetailsDTO>> getAllRentDetails(@RequestParam(value = "current", required = false) Boolean current) {
+        return ResponseEntity.ok(rentService.getRentDetails(current));
     }
 }

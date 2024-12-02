@@ -97,4 +97,20 @@ public class MgdRentRepository implements RentRepository {
         rentCollection.find(filter).into(rents);
         return rents;
     }
+
+    @Override
+    public List<Rent> findAllCurrentRents() {
+        Bson filter = Filters.eq("endDate", null);
+        List<Rent> rents = new ArrayList<>();
+        rentCollection.find(filter).into(rents);
+        return rents;
+    }
+
+    @Override
+    public List<Rent> findAllArchiveRents() {
+        Bson filter = Filters.ne("endDate", null);
+        List<Rent> rents = new ArrayList<>();
+        rentCollection.find(filter).into(rents);
+        return rents;
+    }
 }

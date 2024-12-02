@@ -43,4 +43,9 @@ public class BookController {
         bookService.deleteBook(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<Book>> getAvailableBooks() {
+        return ResponseEntity.ok(bookService.getAvailableBooks());
+    }
 }

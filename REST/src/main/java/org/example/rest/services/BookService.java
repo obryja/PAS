@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -121,5 +122,18 @@ public class BookService {
         } catch (RuntimeException e) {
             throw new RuntimeException("Wystąpił błąd podczas usuwania książki.");
         }
+    }
+
+    public List<Book> getAvailableBooks() {
+        List<Rent> rentedBooks = rentRepository.findAllCurrentRents();
+        List<Book> allBooks = bookRepository.findAll();
+
+        List<String> rentedBookIds = rentedBooks.stream()
+                .map(rent -> rent.getBookId())
+                .collect(Collectors.toList());
+
+        return allBooks.stream()
+                .filter(book -> !rentedBookIds.contains(book.getId()))
+                .collect(Collectors.toList());
     }
 }

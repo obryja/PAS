@@ -14,4 +14,6 @@ public interface RentRepository {
     List<Rent> findByUserIdAndEndDateIsNull(String userId);
     List<Rent> findByBookIdAndEndDateIsNotNull(String userId);
     List<Rent> findByBookIdAndEndDateIsNull(String bookId);
+    List<Rent> findAllCurrentRents();
+    List<Rent> findAllArchiveRents();
 }

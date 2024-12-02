@@ -3,6 +3,7 @@ package org.example.rest.services;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import org.bson.types.ObjectId;
+import org.example.rest.dto.RentDetailsDTO;
 import org.example.rest.exceptions.BadRequestException;
 import org.example.rest.exceptions.ConflictException;
 import org.example.rest.exceptions.NotFoundException;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -199,4 +201,49 @@ public class RentService {
             throw new RuntimeException("Wystąpił błąd podczas usuwania wypożyczenia.");
         }
     }
+
+    public List<RentDetailsDTO> getRentDetails(Boolean current) {
+        List<RentDetailsDTO> rentDetailsList = new ArrayList<>();
+        List<Rent> rents = new ArrayList<>();
+
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
+
+            if (current == null) {
+                rents = rentRepository.findAll();
+            } else if (current) {
+                rents = rentRepository.findAllCurrentRents();
+            } else {
+                rents = rentRepository.findAllArchiveRents();
+            }
+
+            for (Rent rent : rents) {
+                User user = userRepository.findById(rent.getUserId());
+
+                if (user == null) {
+                    clientSession.abortTransaction();
+                    throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
+                }
+
+                Book book = bookRepository.findById(rent.getBookId());
+
+                if (book == null) {
+                    clientSession.abortTransaction();
+                    throw new NotFoundException("Nie znaleziono książki o podanym ID");
+                }
+
+                RentDetailsDTO rentDetailsDTO = new RentDetailsDTO(rent.getId(), user.getUsername(), book.getTitle(), rent.getBeginDate(), rent.getEndDate());
+                rentDetailsList.add(rentDetailsDTO);
+            }
+
+            clientSession.commitTransaction();
+
+            return rentDetailsList;
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Wystąpił błąd podczas odczytania wypożyczenia.");
+        }
+    }
+
 }
