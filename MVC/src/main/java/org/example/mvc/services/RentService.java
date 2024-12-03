@@ -1,9 +1,10 @@
 package org.example.mvc.services;
 
-import org.example.mvc.exceptions.UserAlreadyExistsException;
-import org.example.mvc.models.RentDTO;
-import org.example.mvc.models.UserCuDTO;
-import org.example.mvc.models.UserDTO;
+import org.example.mvc.exceptions.ConflictException;
+import org.example.mvc.exceptions.NotFoundException;
+import org.example.mvc.models.BookDTO;
+import org.example.mvc.models.RentCreateDTO;
+import org.example.mvc.models.RentDetailsDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -24,47 +26,42 @@ public class RentService {
         this.restTemplate = restTemplate;
     }
 
-    public void createRent(RentDTO newRent) {
+    public void createRent(RentCreateDTO newRent) {
         try {
-            restTemplate.postForEntity(restApiUrl + "/api/rents", newRent, RentDTO.class);
+            restTemplate.postForEntity(restApiUrl + "/api/rents", newRent, RentCreateDTO.class);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new ConflictException(e.getResponseBodyAsString());
+            } else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new NotFoundException(e.getResponseBodyAsString());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
+
+    public List<RentDetailsDTO> getRents() {
+        try {
+            ResponseEntity<RentDetailsDTO[]> response = restTemplate.getForEntity(restApiUrl + "/api/rents/details", RentDetailsDTO[].class);
+            return Arrays.asList(response.getBody());
         } catch (HttpClientErrorException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    /*public List<RentDTO> getAllRents() {
-        List<RentDTO> rents = Arrays.asList(restTemplate.getForObject(rentsUrl, RentDTO[].class));
-        List<RentDTO> rentDtos = new ArrayList<>();
-
-        for (RentDTO rent : rents) {
-            User user = restTemplate.getForObject(usersUrl + "/" + rent.getUserId(), User.class);
-            Book book = restTemplate.getForObject(booksUrl + "/" + rent.getBookId(), Book.class);
-
-            RentDTO rentDto = new RentDTO();
-            rentDto.setId(rent.getId());
-            rentDto.setUsername(user.getUsername());
-            rentDto.setBookTitle(book.getTitle());
-            rentDto.setBeginDate(rent.getBeginDate());
-            rentDto.setEndDate(rent.getEndDate());
-
-            rentDtos.add(rentDto);
+    public void endRent(String id) {
+        try {
+            restTemplate.postForLocation(restApiUrl + "/api/rents/" + id, null);
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        return rentDtos;
-    }*/
-
-    /*public List<RentDTO> getAllRents() {
-        ResponseEntity<List<RentDTO>> response = restTemplate.exchange(
-                apiBaseUrl,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<RentDTO>>() {}
-        );
-        return response.getBody();
     }
 
-    public void endRent(String id) {
-        String url = apiBaseUrl + "/api/rents/" + id;
-        restTemplate.postForLocation(url, null);
-    }*/
+    public void deleteRent(String id) {
+        try {
+            restTemplate.delete(restApiUrl + "/api/rents/" + id);
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 }

@@ -4,9 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-public class RentDTO {
-    private String id;
-
+public class RentCreateDTO {
     @NotNull
     private String userId;
 
@@ -15,16 +13,6 @@ public class RentDTO {
 
     @NotNull
     private LocalDateTime beginDate;
-
-    private LocalDateTime endDate;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getUserId() {
         return userId;
@@ -48,13 +36,5 @@ public class RentDTO {
 
     public void setBeginDate(LocalDateTime beginDate) {
         this.beginDate = beginDate;
-    }
-
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
     }
 }

@@ -21,12 +21,12 @@
 <div class="container">
     <div class="row">
         <!-- Panel Boczny -->
-        <aside class="col-md-3">
+        <aside class="col-md-2">
             <div class="list-group">
                 <a href="/" class="list-group-item list-group-item-action" th:text="#{menu.home}"></a>
                 <a href="/users/register" class="list-group-item list-group-item-action" th:text="#{menu.register}"></a>
-                <a href="/rents/list" class="list-group-item list-group-item-action" th:text="#{menu.list}"></a>
                 <a href="/rents/create" class="list-group-item list-group-item-action" th:text="#{menu.add}"></a>
+                <a href="/rents/list" class="list-group-item list-group-item-action" th:text="#{menu.list}"></a>
             </div>
         </aside>
 
@@ -35,6 +35,39 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title mb-4" th:text="#{menu.add}"></h2>
+                    <form th:action="@{/rents}" th:object="${rent}" method="post" id="registrationForm">
+                        <div class="mb-3">
+                            <label for="userId" class="form-label" th:text="#{rent.form.user}"></label>
+                            <select th:field="*{userId}" id="userId" class="form-select" required>
+                                <option th:if="${#lists.isEmpty(users)}" value="" disabled th:text="#{rent.form.noUsers}"></option>
+                                <option th:each="user : ${users}"
+                                        th:value="${user.id}"
+                                        th:text="${user.username}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('userId')}" class="text-danger" th:errors="*{userId}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bookId" class="form-label" th:text="#{rent.form.book}"></label>
+                            <select th:field="*{bookId}" id="bookId" class="form-select" required>
+                                <option th:if="${#lists.isEmpty(books)}" value="" disabled th:text="#{rent.form.noBooks}"></option>
+                                <option th:each="book : ${books}"
+                                        th:value="${book.id}"
+                                        th:text="${book.title}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('bookId')}" class="text-danger" th:errors="*{bookId}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="beginDate" class="form-label" th:text="#{rent.form.beginDate}"></label>
+                            <input type="datetime-local" th:field="*{beginDate}" id="beginDate" class="form-control" required />
+                            <div th:if="${#fields.hasErrors('beginDate')}" class="text-danger" th:errors="*{beginDate}"></div>
+                        </div>
+
+                        <div th:if="${error}" class="text-danger" th:text="${error}"></div>
+
+                        <button type="submit" class="btn btn-primary" th:text="#{menu.add}"></button>
+                    </form>
                 </div>
             </div>
         </main>
@@ -48,5 +81,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!document.getElementById('beginDate').value) {
+            document.getElementById('beginDate').value = new Date().toISOString().substring(0, 16);
+        }
+    });
+</script>
 </body>
 </html>

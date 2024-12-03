@@ -13,7 +13,7 @@
         <div class="container">
             <ol class="breadcrumb mb-0 py-2">
                 <li class="breadcrumb-item"><a href="/" th:text="#{menu.home}" class="text-decoration-none"></a></li>
-                <li class="breadcrumb-item"><a href="/users/register" th:text="#{registration.title}" class="text-decoration-none"></a></li>
+                <li class="breadcrumb-item"><a href="/rents/create" th:text="#{menu.add}" class="text-decoration-none"></a></li>
                 <li class="breadcrumb-item active" aria-current="page" th:text="#{registration.success.title}"></li>
             </ol>
         </div>
@@ -35,14 +35,7 @@
             <main class="col-md-9 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h2 class="card-title mb-4" th:text="#{registration.success}"></h2>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><strong>User ID:</strong> <span th:text="${user.id}"></span></li>
-                            <li class="list-group-item"><strong>Username:</strong> <span th:text="${user.username}"></span></li>
-                            <li class="list-group-item"><strong>Password:</strong> <span th:text="${user.password}"></span></li>
-                            <li class="list-group-item"><strong>Active:</strong> <span th:text="${user.active}"></span></li>
-                            <li class="list-group-item"><strong>Role:</strong> <span th:text="${user.role}"></span></li>
-                        </ul>
+                        <h2 class="card-title mb-4" th:text="#{rent.success}"></h2>
                     </div>
                 </div>
             </main>

@@ -21,12 +21,12 @@
 <div class="container">
     <div class="row">
         <!-- Panel Boczny -->
-        <aside class="col-md-3">
+        <aside class="col-md-2">
             <div class="list-group">
                 <a href="/" class="list-group-item list-group-item-action" th:text="#{menu.home}"></a>
                 <a href="/users/register" class="list-group-item list-group-item-action" th:text="#{menu.register}"></a>
-                <a href="/rents/list" class="list-group-item list-group-item-action" th:text="#{menu.list}"></a>
                 <a href="/rents/create" class="list-group-item list-group-item-action" th:text="#{menu.add}"></a>
+                <a href="/rents/list" class="list-group-item list-group-item-action" th:text="#{menu.list}"></a>
             </div>
         </aside>
 
@@ -35,6 +35,46 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title mb-4" th:text="#{menu.list}"></h2>
+                    <div class="mb-3">
+                        <label for="filterSelect" class="form-label" th:text="#{rent.list.filter}"></label>
+                        <select id="filterSelect" class="form-select">
+                            <option value="all" th:text="#{rent.list.filter.all}"></option>
+                            <option value="current" th:text="#{rent.list.filter.current}"></option>
+                            <option value="finished" th:text="#{rent.list.filter.finished}"></option>
+                        </select>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead class="table-dark text-center">
+                            <tr class="align-middle">
+                                <th th:text="#{rent.list.user}"></th>
+                                <th th:text="#{rent.list.title}"></th>
+                                <th th:text="#{rent.list.beginDate}"></th>
+                                <th th:text="#{rent.list.endDate}"></th>
+                                <th th:text="#{rent.list.action}"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="rentsBody">
+                            <!--<tr th:each="rent : ${rents}" class="align-middle text-center">
+                                <td th:text="${rent.username}"></td>
+                                <td th:text="${rent.title}"></td>
+                                <td th:text="${rent.beginDate}" id="beginDate"></td>
+                                <td th:text="${rent.endDate} ? ${rent.endDate} : #{rent.list.active}" id="endDate"></td>
+                                <td th:if="${rent.endDate != null}"></td>
+                                <td th:if="${rent.endDate == null}">
+                                    <div class="btn-group" role="group">
+                                        <form th:action="@{/rents/end/{id}(id=${rent.id})}" method="post" id="endForm">
+                                            <button type="submit" class="btn btn-success btn-sm" th:text="#{rent.list.end}"></button>
+                                        </form>
+                                        <form th:action="@{/rents/delete/{id}(id=${rent.id})}" method="post" id="deleteForm">
+                                            <button type="submit" class="btn btn-danger btn-sm" th:text="#{rent.list.delete}"></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>-->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
@@ -48,5 +88,90 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const i18n = {
+        active: /*[[#{rent.list.active}]]*/ '',
+        end: /*[[#{rent.list.end}]]*/ '',
+        delete: /*[[#{rent.list.delete}]]*/ ''
+    };
+</script>
+<script>
+    function getRents(filter) {
+        let url = 'http://localhost:8080/api/rents/details';
+        if (filter === 'current') {
+            url += '?current=true';
+        } else if (filter === 'finished') {
+            url += '?current=false';
+        }
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.open('GET', url, true);
+
+        xhttp.onload = function () {
+            if (xhttp.status === 200) {
+                try {
+                    const rents = JSON.parse(xhttp.responseText);
+                    renderRentsTable(rents);
+                } catch (error) {
+                    console.error(error.message);
+                }
+            } else {
+                console.error(xhttp.status);
+            }
+        };
+
+        xhttp.send();
+    }
+
+    function renderRentsTable(rents) {
+        const rentsBody = document.getElementById('rentsBody');
+        rentsBody.innerHTML = '';
+
+        rents.forEach(rent => {
+            const row = document.createElement('tr');
+            row.classList.add('align-middle', 'text-center');
+
+            row.innerHTML = `
+                <td>${rent.username}</td>
+                <td>${rent.title}</td>
+                <td>${new Date(rent.beginDate).toLocaleString()}</td>
+                <td>${rent.endDate ? new Date(rent.endDate).toLocaleString() : i18n.active}</td>
+                <td>
+                    ${rent.endDate ? '' : `
+                        <div class="btn-group" role="group">
+                            <form action="/rents/end/${rent.id}" method="post">
+                                <button type="submit" class="btn btn-success btn-sm">${i18n.end}</button>
+                            </form>
+                            <form action="/rents/delete/${rent.id}" method="post" class="deleteForm">
+                                <button type="submit" class="btn btn-danger btn-sm">${i18n.delete}</button>
+                            </form>
+                        </div>
+                    `}
+                </td>
+            `;
+            rentsBody.appendChild(row);
+        });
+
+        const deleteForms = document.querySelectorAll('.deleteForm');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!confirm("Czy na pewno chcesz usunąć wypożyczenie?")) {
+                    event.preventDefault();
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterSelect = document.getElementById('filterSelect');
+
+        filterSelect.addEventListener('change', () => {
+            const filter = filterSelect.value;
+            getRents(filter);
+        });
+
+        getRents('all');
+    });
+</script>
 </body>
 </html>
