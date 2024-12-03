@@ -11,4 +11,5 @@ public interface UserRepository {
     User update(User user);
     User findByUsername(String username);
     List<User> findByUsernameContaining(String partialUsername);
+    List<User> findActiveClients();
 }

@@ -62,4 +62,14 @@ public class MgdUserRepository implements UserRepository {
         userCollection.find(Filters.regex("username", ".*" + partialUsername + ".*", "i")).into(users);
         return users;
     }
+
+    @Override
+    public List<User> findActiveClients() {
+        List<User> users = new ArrayList<>();
+        userCollection.find(Filters.and(
+                Filters.eq("active", true),
+                Filters.eq("role", "ROLE_CLIENT")
+        )).into(users);
+        return users;
+    }
 }

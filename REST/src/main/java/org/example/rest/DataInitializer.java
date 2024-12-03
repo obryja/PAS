@@ -36,25 +36,52 @@ public class DataInitializer implements CommandLineRunner {
         // Wczytaj zestaw danych inicjujących
         Book book1 = new Book("To Kill a Mockingbird");
         Book book2 = new Book("The Catcher in the Rye");
+        Book book3 = new Book("1984");
+        Book book4 = new Book("Pride and Prejudice");
+        Book book5 = new Book("The Great Gatsby");
+        Book book6 = new Book("Moby-Dick");
+        Book book7 = new Book("War and Peace");
+        Book book8 = new Book("The Odyssey");
+        Book book9 = new Book("Crime and Punishment");
+        Book book10 = new Book("Brave New World");
 
         book1 = bookRepository.create(book1);
         book2 = bookRepository.create(book2);
+        book3 = bookRepository.create(book3);
+        book4 = bookRepository.create(book4);
+        book5 = bookRepository.create(book5);
+        book6 = bookRepository.create(book6);
+        book7 = bookRepository.create(book7);
+        book8 = bookRepository.create(book8);
+        book9 = bookRepository.create(book9);
+        book10 = bookRepository.create(book10);
+
 
         System.out.println("Zainicjalizowano książki.");
 
-        User user1 = new Admin("admin", "admin", true);
-        User user2 = new Manager("manager", "manager", true);
-        User user3 = new Client("client", "client", true);
+        User admin1 = new Admin("admin", "admin", true);
+        User manager1 = new Manager("manager", "manager", true);
+        User client1 = new Client("client", "client", true);
+        User client2 = new Client("client2", "client", false);
+        User client3 = new Client("client3", "client", true);
 
-        user1 = userRepository.create(user1);
-        user2 = userRepository.create(user2);
-        user3 = userRepository.create(user3);
+        admin1 = userRepository.create(admin1);
+        manager1 = userRepository.create(manager1);
+        client1 = userRepository.create(client1);
+        client2 = userRepository.create(client2);
+        client3 = userRepository.create(client3);
 
         System.out.println("Zainicjalizowano użytkowników.");
 
-        Rent rent1 = new Rent(user1.getId(), book1.getId(), LocalDateTime.now());
+        Rent rent1 = new Rent(client1.getId(), book1.getId(), LocalDateTime.now().minusDays(7));
+        rent1.setEndDate(LocalDateTime.now().minusDays(3));
+        Rent rent2 = new Rent(client3.getId(), book2.getId(), LocalDateTime.now().minusDays(5));
+        Rent rent3 = new Rent(client1.getId(), book3.getId(), LocalDateTime.now().minusDays(3));
 
         rent1 = rentRepository.create(rent1);
+        rent2 = rentRepository.create(rent2);
+        rent3 = rentRepository.create(rent3);
+
 
         System.out.println("Zainicjalizowano wypożyczenia.");
     }

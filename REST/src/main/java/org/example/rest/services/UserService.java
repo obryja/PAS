@@ -170,4 +170,8 @@ public class UserService {
             throw new RuntimeException("Wystąpił błąd podczas aktualizacji użytkownika.");
         }
     }
+
+    public List<User> getActiveClients() {
+        return new ArrayList<>(userRepository.findActiveClients());
+    }
 }

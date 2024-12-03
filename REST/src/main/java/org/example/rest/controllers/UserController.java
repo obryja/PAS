@@ -93,4 +93,13 @@ public class UserController {
         User user = userService.deactivateUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(userMapper.userToUserGetDTO(user));
     }
+
+    @GetMapping("/active/client")
+    public ResponseEntity<List<UserGetDTO>> getActiveUsers() {
+        List<User> users = userService.getActiveClients();
+        List<UserGetDTO> userGetDTOs =  users.stream()
+                .map(userMapper::userToUserGetDTO)
+                .toList();
+        return ResponseEntity.ok(userGetDTOs);
+    }
 }

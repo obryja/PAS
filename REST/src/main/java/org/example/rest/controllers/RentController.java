@@ -65,6 +65,7 @@ public class RentController {
         return ResponseEntity.ok().build();
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/details")
     public ResponseEntity<List<RentDetailsDTO>> getAllRentDetails(@RequestParam(value = "current", required = false) Boolean current) {
         return ResponseEntity.ok(rentService.getRentDetails(current));
