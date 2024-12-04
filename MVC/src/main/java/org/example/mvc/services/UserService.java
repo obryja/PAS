@@ -35,9 +35,9 @@ public class UserService {
         }
     }
 
-    public UserDTO createUser(UserCuDTO newUser) {
+    public void createUser(UserCuDTO newUser) {
         try {
-            return restTemplate.postForEntity(restApiUrl + "/api/users/client", newUser, UserDTO.class).getBody();
+            restTemplate.postForEntity(restApiUrl + "/api/users/client", newUser, UserDTO.class);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ConflictException(e.getMessage());
