@@ -82,13 +82,24 @@ public class RentController {
 
     @PostMapping("/end/{id}")
     public String endRent(@PathVariable String id) {
-        rentService.endRent(id);
-        return "redirect:/rents/list";
+        try {
+            rentService.endRent(id);
+            return "redirect:/rents/list";
+        } catch (Exception e) {
+            return "redirect:/rents/list";
+        }
+
+
     }
 
     @PostMapping("/delete/{id}")
     public String deleteRent(@PathVariable String id) {
-        rentService.deleteRent(id);
-        return "redirect:/rents/list";
+        try {
+            rentService.deleteRent(id);
+            return "redirect:/rents/list";
+        } catch (Exception e) {
+            return "redirect:/rents/list";
+        }
+
     }
 }
