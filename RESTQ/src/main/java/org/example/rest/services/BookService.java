@@ -4,7 +4,6 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Qualifier;
 import org.bson.types.ObjectId;
 import org.example.rest.exceptions.BadRequestException;
 import org.example.rest.exceptions.ConflictException;
@@ -19,13 +18,14 @@ import java.util.List;
 @ApplicationScoped
 public class BookService {
     private final BookRepository bookRepository;
-//    private final RentRepository rentRepository;
+    private final RentRepository rentRepository;
 
     @Inject
     MongoClient mongoClient;
 
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, RentRepository rentRepository) {
         this.bookRepository = bookRepository;
+        this.rentRepository = rentRepository;
     }
 
 
@@ -107,13 +107,13 @@ public class BookService {
                 throw new NotFoundException("Nie znaleziono książki o podanym ID");
             }
 
-            /*List<Rent> currentRents = rentRepository.findByBookIdAndEndDateIsNull(existingBook.getId());
+            List<Rent> currentRents = rentRepository.findByBookIdAndEndDateIsNull(existingBook.getId());
             List<Rent> archiveRents = rentRepository.findByBookIdAndEndDateIsNotNull(existingBook.getId());
 
             if (!currentRents.isEmpty() || !archiveRents.isEmpty()) {
                 clientSession.abortTransaction();
                 throw new ConflictException("Nie można usunąć książki, ponieważ ma powiązane wypożyczenia.");
-            }*/
+            }
 
             bookRepository.delete(id);
 
