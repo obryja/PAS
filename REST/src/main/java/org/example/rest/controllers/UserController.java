@@ -102,4 +102,10 @@ public class UserController {
                 .toList();
         return ResponseEntity.ok(userGetDTOs);
     }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<User> getUserDetailsById(@PathVariable String id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
 }
