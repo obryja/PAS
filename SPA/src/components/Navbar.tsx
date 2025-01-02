@@ -15,7 +15,16 @@ const Navbar = () => {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
-                            <NavLink className="nav-link" to="/users">Lista użytkowników</NavLink>
+                            <NavLink className="nav-link" to="/users/list">Lista użytkowników</NavLink>
+                        </li> 
+                        <li className="nav-item">
+                            <NavLink className="nav-link" to="/users/add">Utwórz użytkownika</NavLink>
+                        </li> 
+                        <li className="nav-item">
+                            <NavLink className="nav-link" to="/rents/list">Lista wypożyczeń</NavLink>
+                        </li> 
+                        <li className="nav-item">
+                            <NavLink className="nav-link" to="/rents/add">Utwórz wypożyczenie</NavLink>
                         </li> 
                     </ul>
                 </div>

@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import axios from '../../api/Axios';
-import { UserGet } from '../../model/UserGet';
+import UserGet from '../../model/UserGet';
+import { useConfirmation } from '../../context/ConfirmationContext';
 
 const UserList: React.FC = () => {
     const [users, setUsers] = useState<UserGet[]>([]);
     const [filter, setFilter] = useState('');
+    const { showConfirmation } = useConfirmation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('/users').then((response) => setUsers(response.data));
@@ -14,6 +19,44 @@ const UserList: React.FC = () => {
         ROLE_ADMIN: "Administrator",
         ROLE_MANAGER: "Manager",
         ROLE_CLIENT: "Klient",
+    };
+
+    const handleActivate = async (userId: string) => {
+        showConfirmation(
+            'Czy na pewno chcesz aktywować tego użytkownika?',
+            async () => {
+                try {
+                    await axios.post(`/users/${userId}/activate`);
+
+                    setUsers((prevUsers) =>
+                        prevUsers.map((user) =>
+                            user.id === userId ? { ...user, active: true } : user
+                        )
+                    );
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        );
+    };
+
+    const handleDeactivate = async (userId: string) => {
+        showConfirmation(
+            'Czy na pewno chcesz dezaktywować tego użytkownika?',
+            async () => {
+                try {
+                    await axios.post(`/users/${userId}/deactivate`);
+
+                    setUsers((prevUsers) =>
+                        prevUsers.map((user) =>
+                            user.id === userId ? { ...user, active: false } : user
+                        )
+                    );
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        );
     };
 
     return (
@@ -50,18 +93,26 @@ const UserList: React.FC = () => {
                                 <button
                                     className="btn btn-sm btn-success"
                                     disabled={user.active}
+                                    onClick={() => handleActivate(user.id)}
                                 >
                                     Aktywuj
                                 </button>
                                 <button
                                     className="btn btn-sm btn-danger"
                                     disabled={!user.active}
+                                    onClick={() => handleDeactivate(user.id)}
                                 >
                                     Dezaktywuj
+                                </button>
+                                <button
+                                    className="btn btn-sm btn-primary"
+                                >
+                                    Modyfikuj
                                 </button>
                                 {user.role === "ROLE_CLIENT" && (
                                     <button
                                         className="btn btn-sm btn-info"
+                                        onClick={() => navigate(`/clients/${user.id}`)}
                                     >
                                     Szczegóły
                                     </button>
