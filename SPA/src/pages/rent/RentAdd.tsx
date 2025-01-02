@@ -31,7 +31,7 @@ const RentForm: React.FC = () => {
             await rentAddSchema.validate({ selectedUser, selectedBook, beginDate }, { abortEarly: false });
 
             showConfirmation(
-                `Czy na pewno chcesz utworzyć wypożyczenie dla użytkownika ${selectedUser} na książkę ${selectedBook}?`,
+                `Czy na pewno chcesz utworzyć wypożyczenie?`,
                 async () => {
                     try {
                         await axios.post('/rents', {
@@ -53,7 +53,7 @@ const RentForm: React.FC = () => {
                             const errorMessage = err.response.data || 'Nie udało się utworzyć wypożyczenia';
                             setErrors({ form: errorMessage });
                         } else {
-                            setErrors({ form: 'Wystąpił problem z połączeniem. Spróbuj ponownie.' });
+                            setErrors({ form: 'Nie udało się utworzyć wypożyczenia' });
                         }
                     }
                 }

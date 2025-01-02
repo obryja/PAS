@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 
-export const userAddSchema = Yup.object().shape({
+export const userUpdateSchema = Yup.object().shape({
     username: Yup.string()
         .min(3, 'Nazwa użytkownika musi mieć co najmniej 3 znaki.')
         .max(50, 'Nazwa użytkownika nie może przekroczyć 50 znaków.')
@@ -9,7 +9,4 @@ export const userAddSchema = Yup.object().shape({
         .min(3, 'Hasło musi mieć co najmniej 3 znaki.')
         .max(50, 'Hasło nie może przekroczyć 50 znaków.')
         .required('Hasło jest wymagane.'),
-    userRole: Yup.string()
-        .oneOf(['admin', 'manager', 'client'], 'Invalid role.')
-        .required('Rola jest wymagana'),
 });

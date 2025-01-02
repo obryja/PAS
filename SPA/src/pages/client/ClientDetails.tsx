@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from '../../api/Axios';
 import UserGet from '../../model/UserGet';
-import Rent from '../../model/Rent';
+import RentDetails from '../../model/RentDetails';
 
 const UserDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
     const [user, setUser] = useState<UserGet | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [currentRents, setCurrentRents] = useState<Rent[]>([]);
-    const [archiveRents, setArchiveRents] = useState<Rent[]>([]);
+    const [currentRents, setCurrentRents] = useState<RentDetails[]>([]);
+    const [archiveRents, setArchiveRents] = useState<RentDetails[]>([]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -25,10 +24,10 @@ const UserDetails: React.FC = () => {
 
         const fetchRents = async () => {
             try {
-                const currentRentsResponse = await axios.get(`/rents/user/current/${id}`);
+                const currentRentsResponse = await axios.get(`/rents/user/current/${id}/details`);
                 setCurrentRents(currentRentsResponse.data);
 
-                const archiveRentsResponse = await axios.get(`/rents/user/archive/${id}`);
+                const archiveRentsResponse = await axios.get(`/rents/user/archive/${id}/details`);
                 setArchiveRents(archiveRentsResponse.data);
             } catch (err) {
                 console.error('Błąd podczas pobierania wypożyczeń:', err);
@@ -45,45 +44,57 @@ const UserDetails: React.FC = () => {
     }
 
     if (!user) {
-        return <div className="text-center mt-4"><span className="spinner-border text-primary"></span> Ładowanie danych...</div>;
+        return;
     }
 
     return (
         <div className="container my-4">
             <h2>Szczegóły użytkownika</h2>
-            <div className="card mb-4">
-                <div className="card-body">
-                    <h5 className="card-title">Informacje o użytkowniku</h5>
-                    <p><strong>ID:</strong> {user.id}</p>
-                    <p><strong>Nazwa użytkownika:</strong> {user.username}</p>
-                    <p><strong>Status:</strong> {user.active ? 'Aktywny' : 'Nieaktywny'}</p>
-                    <button
-                        className="btn btn-secondary mt-3"
-                        onClick={() => navigate(-1)}
-                    >
-                        Powrót do listy
-                    </button>
+            <div className="row">
+                <div className="col-md-4 mb-4">
+                    <div className="card">
+                        <div className="card-body text-center">
+                            <h5 className="card-title">ID</h5>
+                            <p className="card-text">{user.id}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-4 mb-4">
+                    <div className="card">
+                        <div className="card-body text-center">
+                            <h5 className="card-title">Nazwa użytkownika</h5>
+                            <p className="card-text">{user.username}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-4 mb-4">
+                    <div className="card">
+                        <div className="card-body text-center">
+                            <h5 className="card-title">Status</h5>
+                            <p className="card-text">{user.active ? 'Aktywny' : 'Nieaktywny'}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <h3>Aktywne wypożyczenia</h3>
-            <div className="table-responsive mb-4">
+            <div className="table-responsive">
                 <table className="table table-striped table-hover table-bordered">
                     <thead className="table-dark">
                         <tr>
-                            <th>ID</th>
-                            <th>Data rozpoczęcia</th>
-                            <th>Data zakończenia</th>
-                            <th>Identyfikator książki</th>
+                            <th className="col-3">ID</th>
+                            <th className="col-3">Data rozpoczęcia</th>
+                            <th className="col-3">Data zakończenia</th>
+                            <th className="col-3">Książka</th>
                         </tr>
                     </thead>
                     <tbody>
                         {currentRents.map((rent) => (
                             <tr key={rent.id}>
                                 <td>{rent.id}</td>
-                                <td>{new Date(rent.beginDate).toLocaleDateString()}</td>
-                                <td>{rent.endDate ? new Date(rent.endDate).toLocaleDateString() : 'Brak'}</td>
-                                <td>{rent.bookId}</td>
+                                <td>{new Date(rent.beginDate).toLocaleString()}</td>
+                                <td>{rent.endDate ? new Date(rent.endDate).toLocaleString() : 'Brak'}</td>
+                                <td>{rent.title}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -95,19 +106,19 @@ const UserDetails: React.FC = () => {
                 <table className="table table-striped table-hover table-bordered">
                     <thead className="table-dark">
                         <tr>
-                            <th>ID</th>
-                            <th>Data rozpoczęcia</th>
-                            <th>Data zakończenia</th>
-                            <th>Identyfikator książki</th>
+                            <th className="col-3">ID</th>
+                            <th className="col-3">Data rozpoczęcia</th>
+                            <th className="col-3">Data zakończenia</th>
+                            <th className="col-3">Książka</th>
                         </tr>
                     </thead>
                     <tbody>
                         {archiveRents.map((rent) => (
                             <tr key={rent.id}>
                                 <td>{rent.id}</td>
-                                <td>{new Date(rent.beginDate).toLocaleDateString()}</td>
-                                <td>{rent.endDate ? new Date(rent.endDate).toLocaleDateString() : 'Brak'}</td>
-                                <td>{rent.bookId}</td>
+                                <td>{new Date(rent.beginDate).toLocaleString()}</td>
+                                <td>{rent.endDate ? new Date(rent.endDate).toLocaleString() : 'Brak'}</td>
+                                <td>{rent.title}</td>
                             </tr>
                         ))}
                     </tbody>

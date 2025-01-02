@@ -55,8 +55,8 @@ const RentList: React.FC = () => {
                             <td>{rent.id}</td>
                             <td>{rent.username}</td>
                             <td>{rent.title}</td>
-                            <td>{new Date(rent.beginDate).toLocaleDateString()}</td>
-                            <td>{rent.endDate ? new Date(rent.endDate).toLocaleDateString() : 'Brak'}</td>
+                            <td>{new Date(rent.beginDate).toLocaleString()}</td>
+                            <td>{rent.endDate ? new Date(rent.endDate).toLocaleString() : 'Brak'}</td>
                             <td>
                                 {rent.endDate === null && (
                                     <button

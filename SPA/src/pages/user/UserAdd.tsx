@@ -9,13 +9,13 @@ import { userAddSchema } from '../../model/UserAddSchema';
 const UserAdd: React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [userType, setUserType] = useState<string>('client');
+    const [userRole, setuserRole] = useState<string>('client');
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { showConfirmation } = useConfirmation();
 
-    const userTypeMap: { [key: string]: string } = {
+    const userRoleMap: { [key: string]: string } = {
         client: 'Klient',
         manager: 'Menedżer',
         admin: 'Administrator',
@@ -26,8 +26,8 @@ const UserAdd: React.FC = () => {
 
         try {
             setErrors({});
-            await userAddSchema.validate({ username, password, userType }, { abortEarly: false });
-            const endpoint = `/users/${userType}`;
+            await userAddSchema.validate({ username, password, userRole }, { abortEarly: false });
+            const endpoint = `/users/${userRole}`;
 
             showConfirmation(`Czy jesteś pewny że chcesz utworzyć tego użytkownika?`, async () => {
                 try {
@@ -35,8 +35,8 @@ const UserAdd: React.FC = () => {
                     
                     setUsername('');
                     setPassword('');
-                    setUserType('client');
-                    setSuccessMessage(`${userTypeMap[userType]} został dodany!`);
+                    setuserRole('client');
+                    setSuccessMessage(`${userRoleMap[userRole]} został dodany!`);
                     setTimeout(() => {
                         setSuccessMessage(null);
                     }, 5000);
@@ -93,7 +93,7 @@ const UserAdd: React.FC = () => {
                             {errors.username && <div className="invalid-feedback">{errors.username}</div>}
                         </div>
         
-                        <div className="mb-4 position-relative">
+                        <div className="mb-4 input-group">
                             <input
                                 type={passwordVisible ? 'text' : 'password'}
                                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
@@ -104,7 +104,7 @@ const UserAdd: React.FC = () => {
                             />
                             <button
                                 type="button"
-                                className="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+                                className="btn btn-link input-group-text border"
                                 onClick={() => setPasswordVisible(!passwordVisible)}
                             >
                                 <i className={`bi ${passwordVisible ? 'bi-eye-slash' : 'bi-eye'}`}></i>
@@ -114,16 +114,16 @@ const UserAdd: React.FC = () => {
         
                         <div className="mb-4">
                             <select
-                                className={`form-select ${errors.userType ? 'is-invalid' : ''}`}
-                                value={userType}
-                                onChange={(e) => setUserType(e.target.value)}
+                                className={`form-select ${errors.userRole ? 'is-invalid' : ''}`}
+                                value={userRole}
+                                onChange={(e) => setuserRole(e.target.value)}
                                 required
                             >
                                 <option value="client">Klient</option>
                                 <option value="manager">Manager</option>
                                 <option value="admin">Administrator</option>
                             </select>
-                            {errors.userType && <div className="invalid-feedback">{errors.userType}</div>}
+                            {errors.userRole && <div className="invalid-feedback">{errors.userRole}</div>}
                         </div>
         
                         <button type="submit" className="btn btn-primary w-100">

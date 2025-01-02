@@ -75,6 +75,7 @@ const UserList: React.FC = () => {
                 <table className="table table-striped table-hover table-bordered">
                     <thead className='table-dark text-center'>
                     <tr>
+                        <th>ID</th>
                         <th>Nazwa użytkownika</th>
                         <th>Rola</th>
                         <th>Status</th>
@@ -86,26 +87,28 @@ const UserList: React.FC = () => {
                         .filter((user) => user.username.toLowerCase().includes(filter.toLowerCase()))
                         .map((user) => (
                         <tr key={user.id}>
+                            <td>{user.id}</td>
                             <td>{user.username}</td>
                             <td>{roleMap[user.role] || user.role}</td>
                             <td>{user.active ? 'Aktywny' : 'Nieaktywny'}</td>
                             <td>
                                 <button
-                                    className="btn btn-sm btn-success"
+                                    className="btn btn-sm btn-success me-2"
                                     disabled={user.active}
                                     onClick={() => handleActivate(user.id)}
                                 >
                                     Aktywuj
                                 </button>
                                 <button
-                                    className="btn btn-sm btn-danger"
+                                    className="btn btn-sm btn-danger me-2"
                                     disabled={!user.active}
                                     onClick={() => handleDeactivate(user.id)}
                                 >
                                     Dezaktywuj
                                 </button>
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-sm btn-primary me-2"
+                                    onClick={() => navigate(`/users/edit/${user.id}`)}
                                 >
                                     Modyfikuj
                                 </button>
