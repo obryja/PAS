@@ -246,4 +246,85 @@ public class RentService {
         }
     }
 
+    public List<RentDetailsDTO> getCurrentRentsDetailsByUserId(String userId) {
+        boolean idIsValid = ObjectId.isValid(userId);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
+        List<RentDetailsDTO> rentDetailsList = new ArrayList<>();
+
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
+
+            List<Rent> rents = rentRepository.findByUserIdAndEndDateIsNull(userId);
+
+            for (Rent rent : rents) {
+                User user = userRepository.findById(rent.getUserId());
+
+                if (user == null) {
+                    clientSession.abortTransaction();
+                    throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
+                }
+
+                Book book = bookRepository.findById(rent.getBookId());
+
+                if (book == null) {
+                    clientSession.abortTransaction();
+                    throw new NotFoundException("Nie znaleziono książki o podanym ID");
+                }
+
+                RentDetailsDTO rentDetailsDTO = new RentDetailsDTO(rent.getId(), user.getUsername(), book.getTitle(), rent.getBeginDate(), rent.getEndDate());
+                rentDetailsList.add(rentDetailsDTO);
+            }
+
+            clientSession.commitTransaction();
+
+            return rentDetailsList;
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Wystąpił błąd podczas odczytania wypożyczenia.");
+        }
+    }
+
+    public List<RentDetailsDTO> getArchiveRentsDetailsByUserId(String userId) {
+        boolean idIsValid = ObjectId.isValid(userId);
+
+        if (!idIsValid) {
+            throw new BadRequestException("To nie jest prawidłowy format id, powinien mieć 24 znaki w zapisane w hex");
+        }
+
+        List<RentDetailsDTO> rentDetailsList = new ArrayList<>();
+
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
+
+            List<Rent> rents = rentRepository.findByUserIdAndEndDateIsNotNull(userId);
+
+            for (Rent rent : rents) {
+                User user = userRepository.findById(rent.getUserId());
+
+                if (user == null) {
+                    clientSession.abortTransaction();
+                    throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
+                }
+
+                Book book = bookRepository.findById(rent.getBookId());
+
+                if (book == null) {
+                    clientSession.abortTransaction();
+                    throw new NotFoundException("Nie znaleziono książki o podanym ID");
+                }
+
+                RentDetailsDTO rentDetailsDTO = new RentDetailsDTO(rent.getId(), user.getUsername(), book.getTitle(), rent.getBeginDate(), rent.getEndDate());
+                rentDetailsList.add(rentDetailsDTO);
+            }
+
+            clientSession.commitTransaction();
+
+            return rentDetailsList;
+        }
+    }
 }

@@ -66,9 +66,18 @@ public class RentController {
         return ResponseEntity.ok().build();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/details")
     public ResponseEntity<List<RentDetailsDTO>> getAllRentDetails(@RequestParam(value = "current", required = false) Boolean current) {
         return ResponseEntity.ok(rentService.getRentDetails(current));
+    }
+
+    @GetMapping("/user/current/{id}/details")
+    public ResponseEntity<List<RentDetailsDTO>> getCurrentRentsDetailsByUser(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getCurrentRentsDetailsByUserId(id));
+    }
+
+    @GetMapping("/user/archive/{id}/details")
+    public ResponseEntity<List<RentDetailsDTO>> getArchiveRentsDetailsByUser(@PathVariable String id) {
+        return ResponseEntity.ok(rentService.getArchiveRentsDetailsByUserId(id));
     }
 }
