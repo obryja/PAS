@@ -126,7 +126,7 @@ const UserEdit: React.FC = () => {
                         </div>
 
                         <div className="mb-4 input-group">
-                            <label htmlFor="password" className="form-label w-100">Nowe hasło (opcjonalnie)</label>
+                            <label htmlFor="password" className="form-label w-100">Hasło</label>
                             <input
                                 type={passwordVisible ? 'text' : 'password'}
                                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
