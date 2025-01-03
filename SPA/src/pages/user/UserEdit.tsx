@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import * as Yup from 'yup';
 
 import axios from '../../api/Axios';
@@ -48,15 +49,22 @@ const UserEdit: React.FC = () => {
             setErrors({});
             await userUpdateSchema.validate({ username, password }, { abortEarly: false });
 
-            showConfirmation(
-                'Czy na pewno chcesz zapisać zmiany?',
-                async () => {
-                    await axios.put(`/users/${id}`, { username, password });
-                    setSuccessMessage('Użytkownik został zaktualizowany!');
+            showConfirmation('Czy na pewno chcesz zapisać zmiany?', async () => {
+                    try {
+                        await axios.put(`/users/${id}`, { username, password });
+                        setSuccessMessage('Użytkownik został zaktualizowany!');
 
-                    setTimeout(() => {
-                        setSuccessMessage(null);
-                    }, 5000);
+                        setTimeout(() => {
+                            setSuccessMessage(null);
+                        }, 5000);
+                    } catch (err) {
+                        if (err instanceof AxiosError && err.response) {
+                            const errorMessage = err.response.data || 'Błąd podczas aktualizacji użytkownika. Spróbuj ponownie później.';
+                            setErrors({ form: errorMessage });
+                        } else {
+                            setErrors({ form: 'Błąd podczas aktualizacji użytkownika. Spróbuj ponownie później.' });
+                        }
+                    }
                 }
             );
         } catch (validationError) {
