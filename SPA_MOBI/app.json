@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "SPA_MOBI",
+    "slug": "SPA_MOBI",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/book512.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/book512.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/book512.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/book32.png"
+    }
+  }
+}
