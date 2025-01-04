@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     dropdownLink: {
-        marginVertical: 5,
+        marginVertical: 10,
     },
     navLinkText: {
         color: '#fff',
