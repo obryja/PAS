@@ -17,7 +17,7 @@ const UserAdd: React.FC = () => {
 
     const userRoleMap: { [key: string]: string } = {
         client: 'Klient',
-        manager: 'Menedżer',
+        manager: 'Manager',
         admin: 'Administrator',
     };
 

@@ -40,6 +40,9 @@ const RentForm: React.FC = () => {
                             beginDate,
                         });
 
+                        const response = await axios.get('/books/available');
+                        setBooks(response.data);
+                        
                         setSuccessMessage('Wypożyczenie zostało utworzone!');
                         setTimeout(() => {
                             setSuccessMessage(null);
