@@ -39,10 +39,6 @@ const UserDetails: React.FC = () => {
         fetchRents();
     }, [id]);
 
-    if (error) {
-        return <div className="alert alert-danger">{error}</div>;
-    }
-
     if (!user) {
         return;
     }

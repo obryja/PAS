@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 
 import axios from '../../api/Axios';
@@ -43,25 +43,17 @@ const UserDetails: React.FC = () => {
         fetchRents();
     }, [id]);
 
-    if (error) {
-        return (
-            <View style={styles.centered}>
-                <Text style={styles.errorText}>{error}</Text>
-            </View>
-        );
-    }
-
-    const renderRentItem = ({ item }: { item: RentDetails }) => (
-        <View style={styles.rentItem}>
+    const renderRentItem = (item: RentDetails) => (
+        <View key={item.id} style={styles.rentItem}>
             <Text style={styles.rentText}><Text style={styles.label}>ID:</Text> {item.id}</Text>
             <Text style={styles.rentText}><Text style={styles.label}>Tytuł:</Text> {item.title}</Text>
-            <Text style={styles.rentText}><Text style={styles.label}>Data rozpoczęcia:</Text>: {new Date(item.beginDate).toLocaleString()}</Text>
+            <Text style={styles.rentText}><Text style={styles.label}>Data rozpoczęcia:</Text> {new Date(item.beginDate).toLocaleString()}</Text>
             <Text style={styles.rentText}><Text style={styles.label}>Data zakończenia:</Text> {item.endDate ? new Date(item.endDate).toLocaleString() : 'Brak'}</Text>
         </View>
     );
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Szczegóły użytkownika</Text>
             <View style={styles.card}>
                 <Text style={styles.cardText}><Text style={styles.label}>ID:</Text> {user?.id}</Text>
@@ -70,34 +62,31 @@ const UserDetails: React.FC = () => {
             </View>
 
             <Text style={styles.sectionTitle}>Aktywne wypożyczenia</Text>
-            <FlatList
-                data={currentRents}
-                renderItem={renderRentItem}
-                keyExtractor={(item) => item.id}
-                ListEmptyComponent={<Text style={styles.emptyText}>Brak aktywnych wypożyczeń</Text>}
-            />
+            <ScrollView style={styles.innerScroll}>
+                {currentRents.length > 0 ? (
+                    currentRents.map((item) => renderRentItem(item))
+                ) : (
+                    <Text style={styles.emptyText}>Brak aktywnych wypożyczeń</Text>
+                )}
+            </ScrollView>
 
             <Text style={styles.sectionTitle}>Zakończone wypożyczenia</Text>
-            <FlatList
-                data={archiveRents}
-                renderItem={renderRentItem}
-                keyExtractor={(item) => item.id}
-                ListEmptyComponent={<Text style={styles.emptyText}>Brak zakończonych wypożyczeń</Text>}
-            />
-        </View>
+            <ScrollView style={styles.innerScroll}>
+                {archiveRents.length > 0 ? (
+                    archiveRents.map((item) => renderRentItem(item))
+                ) : (
+                    <Text style={styles.emptyText}>Brak zakończonych wypożyczeń</Text>
+                )}
+            </ScrollView>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         padding: 16,
         backgroundColor: '#f8f9fa',
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        flexGrow: 1,
     },
     title: {
         fontSize: 24,
@@ -140,10 +129,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 16,
     },
-    errorText: {
-        fontSize: 16,
-        color: '#dc3545',
-        textAlign: 'center',
+    innerScroll: {
+        marginBottom: 16,
     },
 });
 
