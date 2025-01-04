@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { AxiosError } from 'axios';
 import * as Yup from 'yup';
 
 import axios from '../../api/Axios';
-import { useConfirmation } from '../../context/ConfirmationContext';
 import UserGet from '../../model/UserGet';
 import Book from '../../model/Book';
 import { rentAddSchema } from '../../model/RentAddSchema';
+import { useConfirmation } from '../../context/ConfirmationContext';
 
 const RentForm: React.FC = () => {
     const [users, setUsers] = useState<UserGet[]>([]);
     const [books, setBooks] = useState<Book[]>([]);
     const [selectedUser, setSelectedUser] = useState<string>('');
     const [selectedBook, setSelectedBook] = useState<string>('');
-    const [beginDate, setBeginDate] = useState<string>(new Date().toISOString().slice(0, 16));
+    const [beginDate, setBeginDate] = useState<string>(new Date().toISOString().replace('T', ' ').slice(0, 16));
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { showConfirmation } = useConfirmation();
@@ -23,11 +25,11 @@ const RentForm: React.FC = () => {
         axios.get('/books/available').then((response) => setBooks(response.data));
     }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmit = async () => {
         try {
             setErrors({});
+
+            const formattedBeginDate = beginDate.replace(' ', 'T');
             await rentAddSchema.validate({ selectedUser, selectedBook, beginDate }, { abortEarly: false });
 
             showConfirmation(
@@ -37,8 +39,11 @@ const RentForm: React.FC = () => {
                         await axios.post('/rents', {
                             userId: selectedUser,
                             bookId: selectedBook,
-                            beginDate,
+                            beginDate: formattedBeginDate,
                         });
+
+                        const response = await axios.get('/books/available');
+                        setBooks(response.data);
 
                         setSuccessMessage('Wypożyczenie zostało utworzone!');
                         setTimeout(() => {
@@ -47,7 +52,7 @@ const RentForm: React.FC = () => {
 
                         setSelectedUser('');
                         setSelectedBook('');
-                        setBeginDate(new Date().toISOString().slice(0, 16));
+                        setBeginDate(new Date().toISOString().replace('T', ' ').slice(0, 16));
                     } catch (err) {
                          if (err instanceof AxiosError && err.response) {
                             const errorMessage = err.response.data || 'Nie udało się utworzyć wypożyczenia';
@@ -74,77 +79,115 @@ const RentForm: React.FC = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-6 col-lg-4">
-                    <form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm mt-4 mb-4">
-                        <h3 className="text-center mb-4">Utwórz wypożyczenie</h3>
+        <View style={styles.container}>
+            <Text style={styles.title}>Utwórz wypożyczenie</Text>
 
-                        {errors.form && (
-                            <div className="alert alert-danger" role="alert">
-                                {errors.form}
-                            </div>
-                        )}
+            {errors.form && <Text style={styles.errorMessage}>{errors.form}</Text>}
+            {successMessage && <Text style={styles.successMessage}>{successMessage}</Text>}
 
-                        {successMessage && (
-                            <div className="alert alert-success" role="alert">
-                                {successMessage}
-                            </div>
-                        )}
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Data rozpoczęcia:</Text>
+                <TextInput
+                    style={styles.input}
+                    value={beginDate}
+                    onChangeText={setBeginDate}
+                    placeholder="YYYY-MM-DD HH:mm"
+                />
+                {errors.beginDate && <Text style={styles.error}>{errors.beginDate}</Text>}
+            </View>
 
-                        <div className="mb-4">
-                            <select
-                                id="user"
-                                className={`form-select ${errors.selectedUser ? 'is-invalid' : ''}`}
-                                value={selectedUser}
-                                onChange={(e) => setSelectedUser(e.target.value)}
-                            >
-                                <option value="" disabled>Wybierz użytkownika</option>
-                                {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.username}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.selectedUser && <div className="invalid-feedback">{errors.selectedUser}</div>}
-                        </div>
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Użytkownik:</Text>
+                <Picker
+                    selectedValue={selectedUser}
+                    onValueChange={(itemValue) => setSelectedUser(itemValue)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Wybierz użytkownika" value="" />
+                    {users.map((user) => (
+                        <Picker.Item key={user.id} label={user.username} value={user.id} />
+                    ))}
+                </Picker>
+                {errors.selectedUser && <Text style={styles.error}>{errors.selectedUser}</Text>}
+            </View>
 
-                        <div className="mb-4">
-                            <select
-                                id="book"
-                                className={`form-select ${errors.selectedBook ? 'is-invalid' : ''}`}
-                                value={selectedBook}
-                                onChange={(e) => setSelectedBook(e.target.value)}
-                            >
-                                <option value="" disabled>Wybierz książkę</option>
-                                {books.map((book) => (
-                                    <option key={book.id} value={book.id}>
-                                        {book.title}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.selectedBook && <div className="invalid-feedback">{errors.selectedBook}</div>}
-                        </div>
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Książka:</Text>
+                <Picker
+                    selectedValue={selectedBook}
+                    onValueChange={(itemValue) => setSelectedBook(itemValue)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Wybierz książkę" value="" />
+                    {books.map((book) => (
+                        <Picker.Item key={book.id} label={book.title} value={book.id} />
+                    ))}
+                </Picker>
+                {errors.selectedBook && <Text style={styles.error}>{errors.selectedBook}</Text>}
+            </View>
 
-                        <div className="mb-4">
-                            <input
-                                type="datetime-local"
-                                className={`form-control ${errors.beginDate ? 'is-invalid' : ''}`}
-                                value={beginDate}
-                                onChange={(e) => setBeginDate(e.target.value)}
-                                required
-                            />
-                            {errors.beginDate && <div className="invalid-feedback">{errors.beginDate}</div>}
-                        </div>
-
-                        <button type="submit" className="btn btn-success w-100">
-                            Utwórz wypożyczenie
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+            <Button title="Utwórz wypożyczenie" onPress={handleSubmit} color="#28a745" />
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#f8f9fa',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    inputContainer: {
+        marginBottom: 15,
+    },
+    label: {
+        fontSize: 16,
+        marginBottom: 5,
+    },
+    picker: {
+        borderWidth: 1,
+        borderColor: '#ced4da',
+        borderRadius: 5,
+        padding: 10,
+        backgroundColor: '#fff',
+    },
+    input: {
+        height: 50,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#fff',
+    },
+    error: {
+        color: '#dc3545',
+        fontSize: 14,
+        marginTop: 5,
+    },
+    successMessage: {
+        backgroundColor: '#d4edda',
+        color: '#155724',
+        borderColor: '#c3e6cb',
+        textAlign: 'center',
+        marginBottom: 16,
+        padding: 10,
+        borderRadius: 5,
+    },
+    errorMessage: {
+        backgroundColor: '#f1aeb5',
+        color: '#58151c',
+        borderColor: '#58151c',
+        textAlign: 'center',
+        marginBottom: 16,
+        padding: 10,
+        borderRadius: 5,
+    },
+});
 
 export default RentForm;

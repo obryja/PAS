@@ -1,11 +1,15 @@
-/* import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+
 import axios from '../../api/Axios';
 import UserGet from '../../model/UserGet';
 import RentDetails from '../../model/RentDetails';
 
 const UserDetails: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+    const route = useRoute();
+    const { id } = route.params as { id: string };
+
     const [user, setUser] = useState<UserGet | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [currentRents, setCurrentRents] = useState<RentDetails[]>([]);
@@ -40,92 +44,107 @@ const UserDetails: React.FC = () => {
     }, [id]);
 
     if (error) {
-        return <div className="alert alert-danger">{error}</div>;
+        return (
+            <View style={styles.centered}>
+                <Text style={styles.errorText}>{error}</Text>
+            </View>
+        );
     }
 
-    if (!user) {
-        return;
-    }
+    const renderRentItem = ({ item }: { item: RentDetails }) => (
+        <View style={styles.rentItem}>
+            <Text style={styles.rentText}><Text style={styles.label}>ID:</Text> {item.id}</Text>
+            <Text style={styles.rentText}><Text style={styles.label}>Tytuł:</Text> {item.title}</Text>
+            <Text style={styles.rentText}><Text style={styles.label}>Data rozpoczęcia:</Text>: {new Date(item.beginDate).toLocaleString()}</Text>
+            <Text style={styles.rentText}><Text style={styles.label}>Data zakończenia:</Text> {item.endDate ? new Date(item.endDate).toLocaleString() : 'Brak'}</Text>
+        </View>
+    );
 
     return (
-        <div className="container my-4">
-            <h2>Szczegóły użytkownika</h2>
-            <div className="row">
-                <div className="col-md-4 mb-4">
-                    <div className="card">
-                        <div className="card-body text-center">
-                            <h5 className="card-title">ID</h5>
-                            <p className="card-text">{user.id}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4 mb-4">
-                    <div className="card">
-                        <div className="card-body text-center">
-                            <h5 className="card-title">Nazwa użytkownika</h5>
-                            <p className="card-text">{user.username}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4 mb-4">
-                    <div className="card">
-                        <div className="card-body text-center">
-                            <h5 className="card-title">Status</h5>
-                            <p className="card-text">{user.active ? 'Aktywny' : 'Nieaktywny'}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <View style={styles.container}>
+            <Text style={styles.title}>Szczegóły użytkownika</Text>
+            <View style={styles.card}>
+                <Text style={styles.cardText}><Text style={styles.label}>ID:</Text> {user?.id}</Text>
+                <Text style={styles.cardText}><Text style={styles.label}>Nazwa użytkownika:</Text> {user?.username}</Text>
+                <Text style={styles.cardText}><Text style={styles.label}>Status:</Text> {user?.active ? 'Aktywny' : 'Nieaktywny'}</Text>
+            </View>
 
-            <h3>Aktywne wypożyczenia</h3>
-            <div className="table-responsive">
-                <table className="table table-striped table-hover table-bordered">
-                    <thead className="table-dark">
-                        <tr>
-                            <th className="col-3">ID</th>
-                            <th className="col-3">Data rozpoczęcia</th>
-                            <th className="col-3">Data zakończenia</th>
-                            <th className="col-3">Książka</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentRents.map((rent) => (
-                            <tr key={rent.id}>
-                                <td>{rent.id}</td>
-                                <td>{new Date(rent.beginDate).toLocaleString()}</td>
-                                <td>{rent.endDate ? new Date(rent.endDate).toLocaleString() : 'Brak'}</td>
-                                <td>{rent.title}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <Text style={styles.sectionTitle}>Aktywne wypożyczenia</Text>
+            <FlatList
+                data={currentRents}
+                renderItem={renderRentItem}
+                keyExtractor={(item) => item.id}
+                ListEmptyComponent={<Text style={styles.emptyText}>Brak aktywnych wypożyczeń</Text>}
+            />
 
-            <h3>Zakończone wypożyczenia</h3>
-            <div className="table-responsive">
-                <table className="table table-striped table-hover table-bordered">
-                    <thead className="table-dark">
-                        <tr>
-                            <th className="col-3">ID</th>
-                            <th className="col-3">Data rozpoczęcia</th>
-                            <th className="col-3">Data zakończenia</th>
-                            <th className="col-3">Książka</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {archiveRents.map((rent) => (
-                            <tr key={rent.id}>
-                                <td>{rent.id}</td>
-                                <td>{new Date(rent.beginDate).toLocaleString()}</td>
-                                <td>{rent.endDate ? new Date(rent.endDate).toLocaleString() : 'Brak'}</td>
-                                <td>{rent.title}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <Text style={styles.sectionTitle}>Zakończone wypożyczenia</Text>
+            <FlatList
+                data={archiveRents}
+                renderItem={renderRentItem}
+                keyExtractor={(item) => item.id}
+                ListEmptyComponent={<Text style={styles.emptyText}>Brak zakończonych wypożyczeń</Text>}
+            />
+        </View>
     );
 };
 
-export default UserDetails; */
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#f8f9fa',
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    card: {
+        padding: 16,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        marginBottom: 16,
+        elevation: 3,
+    },
+    cardText: {
+        fontSize: 16,
+        marginBottom: 8,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    rentItem: {
+        padding: 16,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        marginBottom: 8,
+        elevation: 2,
+    },
+    rentText: {
+        fontSize: 16,
+        marginBottom: 4,
+    },
+    label: {
+        fontWeight: 'bold',
+    },
+    emptyText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 16,
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#dc3545',
+        textAlign: 'center',
+    },
+});
+
+export default UserDetails;
