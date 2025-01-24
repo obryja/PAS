@@ -3,10 +3,14 @@ package org.example.rest.controllers;
 import jakarta.validation.Valid;
 import org.example.rest.dto.RentDetailsDTO;
 import org.example.rest.models.Rent;
+import org.example.rest.models.User;
 import org.example.rest.services.RentService;
+import org.example.rest.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,9 +19,11 @@ import java.util.List;
 @RequestMapping("/api/rents")
 public class RentController {
     private final RentService rentService;
+    private final UserService userService;
 
-    public RentController(RentService rentService) {
+    public RentController(RentService rentService, UserService userService) {
         this.rentService = rentService;
+        this.userService = userService;
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
@@ -91,5 +97,21 @@ public class RentController {
     @GetMapping("/user/archive/{id}/details")
     public ResponseEntity<List<RentDetailsDTO>> getArchiveRentsDetailsByUser(@PathVariable String id) {
         return ResponseEntity.ok(rentService.getArchiveRentsDetailsByUserId(id));
+    }
+
+    @PreAuthorize("hasAnyRole('CLIENT')")
+    @GetMapping("/user/current/me/details")
+    public ResponseEntity<List<RentDetailsDTO>> getCurrentRentsDetailsByMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user1 = userService.getUserByUsername(authentication.getName());
+        return ResponseEntity.ok(rentService.getCurrentRentsDetailsByUserId(user1.getId()));
+    }
+
+    @PreAuthorize("hasAnyRole('CLIENT')")
+    @GetMapping("/user/archive/me/details")
+    public ResponseEntity<List<RentDetailsDTO>> getArchiveRentsDetailsByMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user1 = userService.getUserByUsername(authentication.getName());
+        return ResponseEntity.ok(rentService.getArchiveRentsDetailsByUserId(user1.getId()));
     }
 }

@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../api/Axios';
 import UserGet from '../../model/UserGet';
 import { useConfirmation } from '../../context/ConfirmationContext';
+import { useUserContext } from '../../context/UserContext';
 
 const UserList: React.FC = () => {
     const [users, setUsers] = useState<UserGet[]>([]);
     const [filter, setFilter] = useState('');
     const { showConfirmation } = useConfirmation();
     const navigate = useNavigate();
+    const { user } = useUserContext();
 
     useEffect(() => {
         axios.get('/users').then((response) => setUsers(response.data));
@@ -84,38 +86,42 @@ const UserList: React.FC = () => {
                     </thead>
                     <tbody>
                     {users
-                        .filter((user) => user.username.toLowerCase().includes(filter.toLowerCase()))
-                        .map((user) => (
-                        <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.username}</td>
-                            <td>{roleMap[user.role] || user.role}</td>
-                            <td>{user.active ? 'Aktywny' : 'Nieaktywny'}</td>
+                        .filter((userr) => userr.username.toLowerCase().includes(filter.toLowerCase()))
+                        .map((userr) => (
+                        <tr key={userr.id}>
+                            <td>{userr.id}</td>
+                            <td>{userr.username}</td>
+                            <td>{roleMap[userr.role] || userr.role}</td>
+                            <td>{userr.active ? 'Aktywny' : 'Nieaktywny'}</td>
                             <td>
-                                <button
-                                    className="btn btn-sm btn-success me-2"
-                                    disabled={user.active}
-                                    onClick={() => handleActivate(user.id)}
-                                >
-                                    Aktywuj
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-danger me-2"
-                                    disabled={!user.active}
-                                    onClick={() => handleDeactivate(user.id)}
-                                >
-                                    Dezaktywuj
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-primary me-2"
-                                    onClick={() => navigate(`/users/edit/${user.id}`)}
-                                >
-                                    Modyfikuj
-                                </button>
-                                {user.role === "ROLE_CLIENT" && (
+                                {user.role === "ROLE_ADMIN" && (
+                                    <>
+                                        <button
+                                            className="btn btn-sm btn-success me-2"
+                                            disabled={userr.active}
+                                            onClick={() => handleActivate(userr.id)}
+                                        >
+                                            Aktywuj
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger me-2"
+                                            disabled={!userr.active}
+                                            onClick={() => handleDeactivate(userr.id)}
+                                        >
+                                            Dezaktywuj
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-primary me-2"
+                                            onClick={() => navigate(`/users/edit/${userr.id}`)}
+                                        >
+                                            Modyfikuj
+                                        </button>
+                                    </>
+                                )}
+                                {user.role === "ROLE_MANAGER" && userr.role === "ROLE_CLIENT" && (
                                     <button
                                         className="btn btn-sm btn-info"
-                                        onClick={() => navigate(`/clients/${user.id}`)}
+                                        onClick={() => navigate(`/clients/${userr.id}`)}
                                     >
                                     Szczegóły
                                     </button>

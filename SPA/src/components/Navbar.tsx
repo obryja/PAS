@@ -29,6 +29,9 @@ const Navbar = () => {
                                 <li className="nav-item">
                                     <NavLink className="nav-link" to="/rents/add">Utwórz wypożyczenie</NavLink>
                                 </li> 
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/info">Szczegóły użytkownika</NavLink>
+                                </li> 
                             </>
                         )}
                         {user?.role === 'ROLE_ADMIN' && (
@@ -57,9 +60,7 @@ const Navbar = () => {
                         {user.role ? (
                                 <>
                                     <li className="nav-item">
-                                        <span className="nav-link">
-                                            {`${user.username} (${roleMap[user.role]})`}
-                                        </span>
+                                        <NavLink className="nav-link" to="/password">{`${user.username} (${roleMap[user.role]})`}</NavLink>
                                     </li>
                                     <li className="nav-item">
                                         <button className="btn btn-link nav-link" onClick={() => { logout();}}>Wyloguj się</button>

@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -113,6 +114,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userMapper.userToUserGetDTO(user1));
     }
 
+    @PostMapping("/password")
+    public ResponseEntity<UserGetDTO> changePassword(@RequestBody @Valid UserPasswordDTO user) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user1 = userService.changePassword(authentication.getName(), user.getPassword());
+        return ResponseEntity.status(HttpStatus.OK).body(userMapper.userToUserGetDTO(user1));
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/{id}/activate")
     public ResponseEntity<UserGetDTO> activateUser(@PathVariable String id) {
@@ -135,6 +143,14 @@ public class UserController {
                 .map(userMapper::userToUserGetDTO)
                 .toList();
         return ResponseEntity.ok(userGetDTOs);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserGetDTO> getMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User user = userService.getUserByUsername(authentication.getName());
+        return ResponseEntity.ok(userMapper.userToUserGetDTO(user));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")

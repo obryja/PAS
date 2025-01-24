@@ -14,7 +14,8 @@ const UserDetails: React.FC = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get(`/users/${id}`);
+                const url = id ? `/users/${id}` : `/users/me`;
+                const response = await axios.get(url);
                 setUser(response.data);
             } catch (err) {
                 console.error('Błąd podczas pobierania danych użytkownika:', err);
@@ -24,10 +25,13 @@ const UserDetails: React.FC = () => {
 
         const fetchRents = async () => {
             try {
-                const currentRentsResponse = await axios.get(`/rents/user/current/${id}/details`);
+                const currentUrl = id ? `/rents/user/current/${id}/details` : `/rents/user/current/me/details`;
+                const archiveUrl = id ? `/rents/user/archive/${id}/details` : `/rents/user/archive/me/details`;
+
+                const currentRentsResponse = await axios.get(currentUrl);
                 setCurrentRents(currentRentsResponse.data);
 
-                const archiveRentsResponse = await axios.get(`/rents/user/archive/${id}/details`);
+                const archiveRentsResponse = await axios.get(archiveUrl);
                 setArchiveRents(archiveRentsResponse.data);
             } catch (err) {
                 console.error('Błąd podczas pobierania wypożyczeń:', err);
@@ -45,6 +49,11 @@ const UserDetails: React.FC = () => {
 
     return (
         <div className="container my-4">
+            {error && (
+                <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>
+            )}
             <h2>Szczegóły użytkownika</h2>
             <div className="row">
                 <div className="col-md-4 mb-4">

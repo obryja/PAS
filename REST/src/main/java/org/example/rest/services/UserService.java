@@ -83,6 +83,30 @@ public class UserService {
         }
     }
 
+    public User changePassword(String username, String password) {
+        try (ClientSession clientSession = mongoClient.startSession()) {
+            clientSession.startTransaction();
+
+            User existingUser =  userRepository.findByUsername(username);
+
+            if (existingUser == null) {
+                clientSession.abortTransaction();
+                throw new NotFoundException("Nie znaleziono użytkownika o podanej nazwie użytkownika");
+            }
+
+            existingUser.setPassword(passwordEncoder.encode(password));
+
+            User updatedUser = userRepository.update(existingUser);
+
+            clientSession.commitTransaction();
+            return updatedUser;
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Wystąpił błąd podczas zmiany hasła.");
+        }
+    }
+
     public User updateUser(String id, String password) {
         boolean idIsValid = ObjectId.isValid(id);
 

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
 import { AxiosError } from 'axios';
 import * as Yup from 'yup';
 
@@ -7,40 +6,12 @@ import axios from '../../api/Axios';
 import { userUpdateSchema } from '../../model/UserUpdateSchema';
 import { useConfirmation } from '../../context/ConfirmationContext';
 
-const UserEdit: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-
-    const [username, setUsername] = useState<string>('');
+const ResetPassword: React.FC = () => {
     const [password, setPassword] = useState<string>('');
-    const [role, setRole] = useState<string>('');
-    const [active, setActive] = useState<boolean>(false);
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { showConfirmation } = useConfirmation();
-
-    const roleMap: { [key: string]: string } = {
-        ROLE_ADMIN: "Administrator",
-        ROLE_MANAGER: "Manager",
-        ROLE_CLIENT: "Klient",
-    };
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await axios.get(`/users/${id}/details`);
-                const { username, password, role, active } = response.data;
-                setUsername(username);
-                setPassword(password);
-                setRole(role);
-                setActive(active);
-            } catch (error) {
-                console.error('Błąd podczas pobierania użytkownika:', error);
-            }
-        };
-
-        fetchUser();
-    }, [id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -51,18 +22,18 @@ const UserEdit: React.FC = () => {
 
             showConfirmation('Czy na pewno chcesz zapisać zmiany?', async () => {
                     try {
-                        await axios.put(`/users/${id}`, { password });
-                        setSuccessMessage('Użytkownik został zaktualizowany!');
+                        await axios.post(`/users/password`, { password });
+                        setSuccessMessage('Hasło zostało zmienione!');
 
                         setTimeout(() => {
                             setSuccessMessage(null);
                         }, 5000);
                     } catch (err) {
                         if (err instanceof AxiosError && err.response) {
-                            const errorMessage = err.response.data || 'Błąd podczas aktualizacji użytkownika. Spróbuj ponownie później.';
+                            const errorMessage = err.response.data || 'Błąd podczas zmiany hasła. Spróbuj ponownie później.';
                             setErrors({ form: errorMessage });
                         } else {
-                            setErrors({ form: 'Błąd podczas aktualizacji użytkownika. Spróbuj ponownie później.' });
+                            setErrors({ form: 'Błąd podczas zmiany hasła. Spróbuj ponownie później.' });
                         }
                     }
                 }
@@ -77,7 +48,7 @@ const UserEdit: React.FC = () => {
                 });
                 setErrors(fieldErrors);
             } else {
-                console.error('Błąd podczas aktualizacji użytkownika:', validationError);
+                console.error('Błąd podczas zmiany hasła:', validationError);
             }
         }
     };
@@ -87,7 +58,7 @@ const UserEdit: React.FC = () => {
             <div className="row justify-content-center">
                 <div className="col-md-6 col-lg-4">
                     <form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm mt-4 mb-4">
-                        <h3 className="text-center mb-4">Edytuj użytkownika</h3>
+                        <h3 className="text-center mb-4">Zmień hasło</h3>
 
                         {successMessage && (
                             <div className="alert alert-success" role="alert">
@@ -100,30 +71,6 @@ const UserEdit: React.FC = () => {
                                 {errors.form}
                             </div>
                         )}
-
-                        <div className="mb-4">
-                            <label htmlFor="userId" className="form-label">ID</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="userId"
-                                value={id}
-                                disabled
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label htmlFor="username" className="form-label">Nazwa użytkownika</label>
-                            <input
-                                type="text"
-                                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                                id="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                disabled
-                            />
-                            {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-                        </div>
 
                         <div className="mb-4 input-group">
                             <label htmlFor="password" className="form-label w-100">Hasło</label>
@@ -145,23 +92,8 @@ const UserEdit: React.FC = () => {
                             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                         </div>
 
-                        <div className="mb-4">
-                            <label htmlFor="role" className="form-label">Rola</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="role"
-                                value={roleMap[role]}
-                                disabled
-                            />
-                        </div>
-
-                        <div className={`badge ${active ? 'bg-success' : 'bg-danger'} mt-2 w-100 d-flex justify-content-center align-items-center fs-6 mb-3`}>
-                            {active ? 'Aktywny' : 'Nieaktywny'}
-                        </div>
-
                         <button type="submit" className="btn btn-primary w-100">
-                            Zapisz zmiany
+                            Zmień hasło
                         </button>
                     </form>
                 </div>
@@ -170,4 +102,4 @@ const UserEdit: React.FC = () => {
     );
 };
 
-export default UserEdit;
+export default ResetPassword;

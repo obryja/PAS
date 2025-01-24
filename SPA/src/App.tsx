@@ -12,6 +12,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import { UserProvider } from './context/UserContext';
 import PrivateRoute from './components/PrivateRoute';
+import ResetPassword from './pages/user/ResetPassword';
 
 const App: React.FC = () => {
     return (
@@ -25,21 +26,34 @@ const App: React.FC = () => {
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/users/add" element={<UserAdd />} />
 
+                            <Route path="/password" element={
+                                <PrivateRoute allowedRoles={['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_CLIENT']}>
+                                    {<ResetPassword />}
+                                </PrivateRoute>
+                            }/>
+
                             <Route path="/users/list" element={
                                 <PrivateRoute allowedRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
                                     {<UserList />}
                                 </PrivateRoute>
                             }/>
 
+                            <Route path="/users/edit/:id" element={
+                                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                                    {<UserEdit />}
+                                </PrivateRoute>
+                            }/>
+
                             <Route path="/clients/:id" element={
-                                <PrivateRoute allowedRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+                                <PrivateRoute allowedRoles={['ROLE_MANAGER']}>
                                     {<ClientDetails />}
                                 </PrivateRoute>
                             }/>
 
-                            <Route path="/users/edit/:id" element={
-                                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-                                    {<UserEdit />}
+                            
+                            <Route path="/info" element={
+                                <PrivateRoute allowedRoles={['ROLE_CLIENT']}>
+                                    {<ClientDetails />}
                                 </PrivateRoute>
                             }/>
 

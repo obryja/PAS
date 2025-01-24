@@ -7,8 +7,10 @@ import { useConfirmation } from '../../context/ConfirmationContext';
 import UserGet from '../../model/UserGet';
 import Book from '../../model/Book';
 import { rentAddSchema } from '../../model/RentAddSchema';
+import { useUserContext } from '../../context/UserContext';
 
 const RentForm: React.FC = () => {
+    const { user } = useUserContext();
     const [users, setUsers] = useState<UserGet[]>([]);
     const [books, setBooks] = useState<Book[]>([]);
     const [selectedUser, setSelectedUser] = useState<string>('');
@@ -19,9 +21,16 @@ const RentForm: React.FC = () => {
     const { showConfirmation } = useConfirmation();
 
     useEffect(() => {
-        axios.get('/users/active/client').then((response) => setUsers(response.data));
+        if (user.role === 'ROLE_CLIENT') {
+            axios.get('/users/me').then((response) => {
+                setSelectedUser(response.data.id);
+            });
+        } else {
+            axios.get('/users/active/client').then((response) => setUsers(response.data));
+        }
+
         axios.get('/books/available').then((response) => setBooks(response.data));
-    }, []);
+    }, [user.role]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,22 +104,24 @@ const RentForm: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="mb-4">
-                            <select
-                                id="user"
-                                className={`form-select ${errors.selectedUser ? 'is-invalid' : ''}`}
-                                value={selectedUser}
-                                onChange={(e) => setSelectedUser(e.target.value)}
-                            >
-                                <option value="" disabled>Wybierz użytkownika</option>
-                                {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.username}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.selectedUser && <div className="invalid-feedback">{errors.selectedUser}</div>}
-                        </div>
+                        {user.role === 'ROLE_MANAGER' && (
+                            <div className="mb-4">
+                                <select
+                                    id="user"
+                                    className={`form-select ${errors.selectedUser ? 'is-invalid' : ''}`}
+                                    value={selectedUser}
+                                    onChange={(e) => setSelectedUser(e.target.value)}
+                                >
+                                    <option value="" disabled>Wybierz użytkownika</option>
+                                    {users.map((user) => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.username}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.selectedUser && <div className="invalid-feedback">{errors.selectedUser}</div>}
+                            </div>
+                        )}
 
                         <div className="mb-4">
                             <select
