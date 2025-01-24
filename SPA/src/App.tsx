@@ -9,28 +9,57 @@ import UserAdd from './pages/user/UserAdd';
 import RentAdd from './pages/rent/RentAdd';
 import UserEdit from './pages/user/UserEdit';
 import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import { UserProvider } from './context/UserContext';
+import PrivateRoute from './components/PrivateRoute';
 
 const App: React.FC = () => {
     return (
         <ConfirmationProvider>
-            <Router>
-                <Navbar />
-                <div className="container mt-4">
-                    <Routes>
-                        <Route path="/" element={<HomePage />} />
+            <UserProvider>
+                <Router>
+                    <Navbar />
+                    <div className="container mt-4">
+                        <Routes>
+                            <Route path="/" element={<HomePage />} />
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/users/add" element={<UserAdd />} />
 
-                        <Route path="/users/list" element={<UserList />} />
-                        <Route path="/users/add" element={<UserAdd />} />
-                        <Route path="/users/edit/:id" element={<UserEdit />} />
-                        <Route path="/clients/:id" element={<ClientDetails />} />
+                            <Route path="/users/list" element={
+                                <PrivateRoute allowedRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+                                    {<UserList />}
+                                </PrivateRoute>
+                            }/>
 
-                        <Route path="/rents/list" element={<RentList />} />
-                        <Route path="/rents/add" element={<RentAdd />} />
+                            <Route path="/clients/:id" element={
+                                <PrivateRoute allowedRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+                                    {<ClientDetails />}
+                                </PrivateRoute>
+                            }/>
 
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                </div>
-            </Router>
+                            <Route path="/users/edit/:id" element={
+                                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                                    {<UserEdit />}
+                                </PrivateRoute>
+                            }/>
+
+                            <Route path="/rents/list" element={
+                                <PrivateRoute allowedRoles={['ROLE_MANAGER']}>
+                                    {<RentList />}
+                                </PrivateRoute>
+                            }/>
+
+                            <Route path="/rents/add" element={
+                                <PrivateRoute allowedRoles={['ROLE_MANAGER', 'ROLE_CLIENT']}>
+                                    {<RentAdd />}
+                                </PrivateRoute>
+                            }/>
+
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </div>
+                </Router>
+            </UserProvider>
         </ConfirmationProvider>
     );
 };

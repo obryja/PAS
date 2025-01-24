@@ -1,7 +1,17 @@
-import book from '/book32.png';
 import { Link, NavLink } from 'react-router-dom';
 
+import book from '/book32.png';
+import { useUserContext } from '../context/UserContext';
+
 const Navbar = () => {
+    const { logout, user } = useUserContext();
+
+    const roleMap: { [key: string]: string } = {
+        ROLE_ADMIN: "Administrator",
+        ROLE_MANAGER: "Manager",
+        ROLE_CLIENT: "Klient",
+    };
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
@@ -14,18 +24,57 @@ const Navbar = () => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav me-auto">
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/users/list">Lista użytkowników</NavLink>
-                        </li> 
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/users/add">Utwórz użytkownika</NavLink>
-                        </li> 
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/rents/list">Lista wypożyczeń</NavLink>
-                        </li> 
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/rents/add">Utwórz wypożyczenie</NavLink>
-                        </li> 
+                        {user?.role === 'ROLE_CLIENT' && (
+                            <>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/rents/add">Utwórz wypożyczenie</NavLink>
+                                </li> 
+                            </>
+                        )}
+                        {user?.role === 'ROLE_ADMIN' && (
+                            <>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/users/list">Lista użytkowników</NavLink>
+                                </li> 
+                            </>
+                            
+                        )}
+                        {user?.role === 'ROLE_MANAGER' && (
+                            <>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/users/list">Lista użytkowników</NavLink>
+                                </li> 
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/rents/list">Lista wypożyczeń</NavLink>
+                                </li> 
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/rents/add">Utwórz wypożyczenie</NavLink>
+                                </li> 
+                            </>
+                        )}
+                    </ul>
+                    <ul className="navbar-nav">
+                        {user.role ? (
+                                <>
+                                    <li className="nav-item">
+                                        <span className="nav-link">
+                                            {`${user.username} (${roleMap[user.role]})`}
+                                        </span>
+                                    </li>
+                                    <li className="nav-item">
+                                        <button className="btn btn-link nav-link" onClick={() => { logout();}}>Wyloguj się</button>
+                                    </li> 
+                                </>
+                            ) : (
+                            <>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/login">Zaloguj się</NavLink>
+                                </li> 
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/users/add">Utwórz użytkownika</NavLink>
+                                </li> 
+                            </>
+                        )}
                     </ul>
                 </div>
             </div>

@@ -9,7 +9,9 @@ import org.example.rest.exceptions.ConflictException;
 import org.example.rest.exceptions.NotFoundException;
 import org.example.rest.models.User;
 import org.example.rest.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final MongoClient mongoClient;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, @Qualifier("mongoClient") MongoClient mongoClient) {
         this.userRepository = userRepository;
@@ -62,6 +66,8 @@ public class UserService {
         try (ClientSession clientSession = mongoClient.startSession()) {
             clientSession.startTransaction();
 
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
             User createdUser = userRepository.create(user);
 
             clientSession.commitTransaction();
@@ -77,7 +83,7 @@ public class UserService {
         }
     }
 
-    public User updateUser(String id, String username, String password) {
+    public User updateUser(String id, String password) {
         boolean idIsValid = ObjectId.isValid(id);
 
         if (!idIsValid) {
@@ -93,8 +99,7 @@ public class UserService {
                 throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
             }
 
-            existingUser.setUsername(username);
-            existingUser.setPassword(password);
+            existingUser.setPassword(passwordEncoder.encode(password));
 
             User updatedUser = userRepository.update(existingUser);
 

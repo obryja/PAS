@@ -5,6 +5,7 @@ import org.example.rest.models.*;
 import org.example.rest.repositories.BookRepository;
 import org.example.rest.repositories.RentRepository;
 import org.example.rest.repositories.UserRepository;
+import org.example.rest.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -15,14 +16,14 @@ import java.time.LocalDateTime;
 public class DataInitializer implements CommandLineRunner {
 
     private final BookRepository bookRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final RentRepository rentRepository;
     private final MongoDatabase mongoDatabase;
 
     @Autowired
-    public DataInitializer(BookRepository bookRepository, UserRepository userRepository, RentRepository rentRepository, MongoDatabase mongoDatabase) {
+    public DataInitializer(BookRepository bookRepository, UserService userService, RentRepository rentRepository, MongoDatabase mongoDatabase) {
         this.bookRepository = bookRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.rentRepository = rentRepository;
         this.mongoDatabase = mongoDatabase;
     }
@@ -56,7 +57,6 @@ public class DataInitializer implements CommandLineRunner {
         book9 = bookRepository.create(book9);
         book10 = bookRepository.create(book10);
 
-
         System.out.println("Zainicjalizowano książki.");
 
         User admin1 = new Admin("admin", "admin", true);
@@ -65,11 +65,11 @@ public class DataInitializer implements CommandLineRunner {
         User client2 = new Client("client2", "client", false);
         User client3 = new Client("client3", "client", true);
 
-        admin1 = userRepository.create(admin1);
-        manager1 = userRepository.create(manager1);
-        client1 = userRepository.create(client1);
-        client2 = userRepository.create(client2);
-        client3 = userRepository.create(client3);
+        admin1 = userService.createUser(admin1);
+        manager1 = userService.createUser(manager1);
+        client1 = userService.createUser(client1);
+        client2 = userService.createUser(client2);
+        client3 = userService.createUser(client3);
 
         System.out.println("Zainicjalizowano użytkowników.");
 
@@ -81,7 +81,6 @@ public class DataInitializer implements CommandLineRunner {
         rent1 = rentRepository.create(rent1);
         rent2 = rentRepository.create(rent2);
         rent3 = rentRepository.create(rent3);
-
 
         System.out.println("Zainicjalizowano wypożyczenia.");
     }

@@ -47,11 +47,11 @@ const UserEdit: React.FC = () => {
 
         try {
             setErrors({});
-            await userUpdateSchema.validate({ username, password }, { abortEarly: false });
+            await userUpdateSchema.validate({ password }, { abortEarly: false });
 
             showConfirmation('Czy na pewno chcesz zapisać zmiany?', async () => {
                     try {
-                        await axios.put(`/users/${id}`, { username, password });
+                        await axios.put(`/users/${id}`, { password });
                         setSuccessMessage('Użytkownik został zaktualizowany!');
 
                         setTimeout(() => {
@@ -120,7 +120,7 @@ const UserEdit: React.FC = () => {
                                 id="username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                required
+                                disabled
                             />
                             {errors.username && <div className="invalid-feedback">{errors.username}</div>}
                         </div>
