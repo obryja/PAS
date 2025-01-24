@@ -11,13 +11,14 @@ const UserEdit: React.FC = () => {
     const { id } = useParams<{ id: string }>();
 
     const [username, setUsername] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
+    // const [password, setPassword] = useState<string>('');
     const [role, setRole] = useState<string>('');
     const [active, setActive] = useState<boolean>(false);
-    const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
+    // const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { showConfirmation } = useConfirmation();
+    const [etag, setEtag] = useState('');
 
     const roleMap: { [key: string]: string } = {
         ROLE_ADMIN: "Administrator",
@@ -28,12 +29,13 @@ const UserEdit: React.FC = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get(`/users/${id}/details`);
-                const { username, password, role, active } = response.data;
+                const response = await axios.get(`/users/${id}`);
+                const { username, role, active } = response.data;
                 setUsername(username);
-                setPassword(password);
                 setRole(role);
                 setActive(active);
+                // setPassword('');
+                setEtag(response.headers['etag'].slice(1, -1));
             } catch (error) {
                 console.error('Błąd podczas pobierania użytkownika:', error);
             }
@@ -47,11 +49,17 @@ const UserEdit: React.FC = () => {
 
         try {
             setErrors({});
-            await userUpdateSchema.validate({ password }, { abortEarly: false });
+            await userUpdateSchema.validate({ username }, { abortEarly: false });
 
             showConfirmation('Czy na pewno chcesz zapisać zmiany?', async () => {
                     try {
-                        await axios.put(`/users/${id}`, { password });
+                        const res = await axios.put(`/users/${id}`, { username }, {
+                            headers: {
+                                'If-Match': etag
+                            }
+                        });
+                        setEtag(res.headers['etag']);
+
                         setSuccessMessage('Użytkownik został zaktualizowany!');
 
                         setTimeout(() => {
@@ -120,12 +128,12 @@ const UserEdit: React.FC = () => {
                                 id="username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                disabled
+                                required
                             />
                             {errors.username && <div className="invalid-feedback">{errors.username}</div>}
                         </div>
 
-                        <div className="mb-4 input-group">
+                       {/*  <div className="mb-4 input-group">
                             <label htmlFor="password" className="form-label w-100">Hasło</label>
                             <input
                                 type={passwordVisible ? 'text' : 'password'}
@@ -143,7 +151,7 @@ const UserEdit: React.FC = () => {
                                 <i className={`bi ${passwordVisible ? 'bi-eye-slash' : 'bi-eye'}`}></i>
                             </button>
                             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-                        </div>
+                        </div> */}
 
                         <div className="mb-4">
                             <label htmlFor="role" className="form-label">Rola</label>

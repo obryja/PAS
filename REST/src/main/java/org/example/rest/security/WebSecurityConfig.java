@@ -69,13 +69,14 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://127.0.0.1:3000")); // Your allowed origin(s)
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Your allowed HTTP methods
-        configuration.setAllowedHeaders(List.of("*")); // Your allowed headers
-        configuration.setAllowCredentials(true); // Allow credentials (cookies, authentication, etc.)
+        configuration.setAllowedOrigins(List.of("http://127.0.0.1:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("ETag"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Apply to all endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

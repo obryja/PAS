@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import * as Yup from 'yup';
 
 import axios from '../../api/Axios';
-import { userUpdateSchema } from '../../model/UserUpdateSchema';
 import { useConfirmation } from '../../context/ConfirmationContext';
+import { ResetPasswordSchema } from '../../model/ResetPasswordSchema';
 
 const ResetPassword: React.FC = () => {
     const [password, setPassword] = useState<string>('');
@@ -18,7 +18,7 @@ const ResetPassword: React.FC = () => {
 
         try {
             setErrors({});
-            await userUpdateSchema.validate({ password }, { abortEarly: false });
+            await ResetPasswordSchema.validate({ password }, { abortEarly: false });
 
             showConfirmation('Czy na pewno chcesz zapisać zmiany?', async () => {
                     try {

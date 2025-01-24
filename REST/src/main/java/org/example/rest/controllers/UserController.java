@@ -1,9 +1,11 @@
 package org.example.rest.controllers;
 
 import jakarta.validation.Valid;
+import io.jsonwebtoken.Jwts;
 import org.example.rest.dto.UserCuDTO;
 import org.example.rest.dto.UserGetDTO;
 import org.example.rest.dto.UserPasswordDTO;
+import org.example.rest.dto.UserUpdateDTO;
 import org.example.rest.exceptions.UnauthorizedException;
 import org.example.rest.mappers.UserMapper;
 import org.example.rest.models.Admin;
@@ -12,6 +14,7 @@ import org.example.rest.models.Manager;
 import org.example.rest.models.User;
 import org.example.rest.security.JwtUtils;
 import org.example.rest.services.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -84,13 +88,6 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @GetMapping("/{id}")
-    public ResponseEntity<UserGetDTO> getUserById(@PathVariable String id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(userMapper.userToUserGetDTO(user));
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/username/{username}")
     public ResponseEntity<UserGetDTO> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
@@ -107,11 +104,26 @@ public class UserController {
         return ResponseEntity.ok(userGetDTOs);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserGetDTO> getUserById(@PathVariable String id) {
+        User user = userService.getUserById(id);
+        String jws = jwtUtils.generateTokenUpdate(user);
+
+        return ResponseEntity.ok().header("ETag", jws).body(userMapper.userToUserGetDTO(user));
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<UserGetDTO> updateUser(@PathVariable String id, @RequestBody @Valid UserPasswordDTO user) {
-        User user1 = userService.updateUser(id, user.getPassword());
-        return ResponseEntity.status(HttpStatus.OK).body(userMapper.userToUserGetDTO(user1));
+    public ResponseEntity<UserGetDTO> updateUser(@PathVariable String id, @RequestHeader("If-Match") String ifMatch, @RequestBody @Valid UserUpdateDTO user) {
+        User existingUser = userService.getUserById(id);
+        jwtUtils.verifyUpdate(ifMatch, existingUser);
+
+        User updatedUser = userService.updateUser(id, user.getUsername());
+
+        String jws = jwtUtils.generateTokenUpdate(updatedUser);
+
+        return ResponseEntity.ok().header("ETag", jws).body(userMapper.userToUserGetDTO(updatedUser));
     }
 
     @PostMapping("/password")
@@ -153,10 +165,10 @@ public class UserController {
         return ResponseEntity.ok(userMapper.userToUserGetDTO(user));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    /*@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/{id}/details")
     public ResponseEntity<UserGetDTO> getUserDetailsById(@PathVariable String id) {
         User user = userService.getUserById(id);
         return ResponseEntity.ok(userMapper.userToUserGetDTO(user));
-    }
+    }*/
 }

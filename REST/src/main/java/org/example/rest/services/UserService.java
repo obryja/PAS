@@ -107,7 +107,7 @@ public class UserService {
         }
     }
 
-    public User updateUser(String id, String password) {
+    public User updateUser(String id, String username) {
         boolean idIsValid = ObjectId.isValid(id);
 
         if (!idIsValid) {
@@ -123,7 +123,7 @@ public class UserService {
                 throw new NotFoundException("Nie znaleziono użytkownika o podanym ID");
             }
 
-            existingUser.setPassword(passwordEncoder.encode(password));
+            existingUser.setUsername(username);
 
             User updatedUser = userRepository.update(existingUser);
 
